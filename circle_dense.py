@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import torch
+import copy
 # import sys, os 
 
 def make_circle_points(num):
@@ -45,7 +46,8 @@ class DenseNet(torch.nn.Module):
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
-        output = torch.tanh(self.fc2(x))
+        output = self.fc2(x)
+        # output = torch.tanh(self.fc2(x))
         return output
 
 
@@ -61,20 +63,34 @@ def training(train_loader, model, criterion, optimizer):
     ave_train_loss = train_loss / len(train_loader.dataset)
     return ave_train_loss
 
-def testing(test_loader, model, criterion, optimizer):
-    with torch.no_grad():
-        val_loss = 0
-        record_point_output = [[0, 0]]
-        # record_point_output = []
-        for input_data, target_data in test_loader:
-            point_output = model(input_data.float())
-            loss = criterion(point_output, target_data.float())
-            val_loss += loss.item()
+def training_openloop(train_loader, model, criterion, optimizer, normalize_rate):
+    train_loss = 0
+    begin = torch.tensor([[-1, 0]])
+    begin = begin * normalize_rate
+    for i, (input_data, target_data) in enumerate(train_loader):
+        model.zero_grad()
+        output = model(begin.float())
+        begin = copy.deepcopy(output.detach())
+        loss = criterion(output, target_data.float())
+        loss.backward()
+        optimizer.step()
+        train_loss += loss.item()
+    ave_train_loss = train_loss / len(train_loader.dataset)
+    return ave_train_loss
 
-            point_output = point_output.reshape(len(point_output),2).detach()
-            record_point_output = np.concatenate(([record_point_output, point_output]), axis=0)
-            # record_point_output.append(list(point_output))
-        ave_val_loss = val_loss / len(test_loader.dataset)
+def testing(test_loader, model, criterion, optimizer):
+    val_loss = 0
+    record_point_output = [[0, 0]]
+    # record_point_output = []
+    for input_data, target_data in test_loader:
+        point_output = model(input_data.float())
+        loss = criterion(point_output, target_data.float())
+        val_loss += loss.item()
+
+        point_output = point_output.reshape(len(point_output),2).detach()
+        record_point_output = np.concatenate(([record_point_output, point_output]), axis=0)
+        # record_point_output.append(list(point_output))
+    ave_val_loss = val_loss / len(test_loader.dataset)
     return ave_val_loss, record_point_output
 
 def testing_openloop(test_loader, model, criterion, optimizer, normalize_rate):
@@ -99,7 +115,7 @@ def drawing_plots(points):
     test_fig = plt.figure(figsize=(6.4, 6.4))
     plt.grid()
     plt.scatter(points[:][0], points[:][1])
-    test_fig.savefig(path + "circle_dense_plot_0430.png")
+    test_fig.savefig(path + "circle_dense_plot_0509.png")
     plt.show()
 
 def drawing_loss_graph(num_epoch, train_loss_list, val_loss_list):
@@ -112,17 +128,15 @@ def drawing_loss_graph(num_epoch, train_loss_list, val_loss_list):
     plt.ylabel('loss')
     plt.title('Training and validation loss')
     plt.grid()
-    loss_fig.savefig(path + "circle_dense_loss_0430.png")
+    loss_fig.savefig(path + "circle_dense_loss_0509.png")
     plt.show()
 
 def frame_update(i, record_output, gif_plot_x0, gif_plot_x1):
     if i != 0:
-        # Clear the current graph.
-        plt.cla()
-    # range of the graph
-    plt.xlim(-1.1, 1.1)
-    plt.ylim(-1.1, 1.1)
-    plt.title("circle plots by Dense Net")  # label(0~3)->(1~4)
+        plt.cla()  # Clear the current graph.
+    plt.xlim(-1.1, 1.1)  # range of the graph
+    plt.ylim(-1.1, 1.1)  # range of the graph
+    plt.title("circle plots by Dense Net")
 
     gif_plot_x0.append(record_output[i, 0])
     gif_plot_x1.append(record_output[i, 1])
@@ -136,7 +150,7 @@ def make_gif(record_point_output):
     ani = animation.FuncAnimation(fig_RNN, frame_update, 
                                 fargs = (record_point_output, gif_plot_x0, gif_plot_x1), 
                                 interval = 50, frames = 100)
-    ani.save(path + "output_circle(Dense)_drawing_0430.gif", writer="imagemagick")
+    ani.save(path + "output_circle(Dense)_drawing_0509.gif", writer="imagemagick")
 
 def main():
     rate = 0.8  # normalize range: -0.8 ~ 0.8
@@ -147,9 +161,8 @@ def main():
     val_loss_list = []
     is_save = True  # save the model parameters 
 
-    points = make_circle_points(num_div)
-    # points = torch.nn.functional.normalize(torch.tensor(points)) * rate  # range(-0.8~0.8)
-    points, normalize_rate = plot_normalize(points, rate)
+    points = make_circle_points(num_div) 
+    points, normalize_rate = plot_normalize(points, rate)  # range(-0.8~0.8)
     train_dataset = point_dataset(points, is_Noise=True)
     test_dataset = point_dataset(points, is_Noise=False)
 
@@ -166,6 +179,8 @@ def main():
         # train
         model.train()
         ave_train_loss = training(train_loader, model, criterion, optimizer)
+        # ave_train_loss = training_openloop(train_loader, model, criterion, 
+        #                                     optimizer, normalize_rate)
 
         # eval
         model.eval()
@@ -199,11 +214,12 @@ def main():
 
     # test
     model2.eval()
-    ave_test_loss, record_point_output = testing_openloop(test_loader, model2, criterion, optimizer2, normalize_rate)
+    ave_test_loss, record_point_output = testing_openloop(test_loader, model2, criterion, 
+                                                            optimizer2, normalize_rate)
     print(f"Test Loss: {ave_test_loss:.5f}")
 
-    record_point_output = np.delete(record_point_output, obj=0, axis=0)  # Delete the initial value (Row: 0)
-    # print(record_point_output)
+    record_point_output = np.delete(record_point_output, obj=0, axis=0)  # Delete the 
+                                                                         # initial value (Row: 0)
     drawing_plots([record_point_output[:, 0], record_point_output[:, 1]])
 
     make_gif(record_point_output)
