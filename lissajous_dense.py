@@ -83,9 +83,7 @@ class point_dataset(torch.utils.data.Dataset):
 class DenseNet(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        # self.num_time = num_time
         self.fc1_1 = torch.nn.Linear(2, 32)
-        # self.fc1_1 = torch.nn.Linear(self.num_time*2, 32)
         self.fc2_1 = torch.nn.Linear(32, 2)
         self.fc2_2 = torch.nn.Linear(32, 4)
 
@@ -95,9 +93,6 @@ class DenseNet(torch.nn.Module):
         # point_output = torch.tanh(self.fc2_1(x))
         point_output = self.fc2_1(x)
         label_output = torch.nn.functional.softmax(self.fc2_2(x), dim=1)
-        # print(point_output.shape)
-        # print(label_output.shape)
-        # sys.exit()
         return point_output, label_output
 
 
