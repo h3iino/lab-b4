@@ -3,12 +3,13 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import torch
 # from torchvision import transforms
-import sys, os 
+import sys, os
+import copy
 
 def make_Lissajous_points(num):
-    # theta = np.linspace(0, 2*np.pi, num)
+    theta = np.linspace(0, 2*np.pi, num)
     # theta = np.linspace(-np.pi, np.pi, num)
-    theta = np.linspace(-0.5*np.pi, 1.5*np.pi, num)
+    # theta = np.linspace(-0.5*np.pi, 1.5*np.pi, num)
     x_points = np.array([2 * np.sin(1 * theta)])
     y_points = np.array([1 * np.sin(2 * theta)])
     points = np.concatenate(([x_points, y_points]), axis=0).T
@@ -80,7 +81,7 @@ class point_dataset(torch.utils.data.Dataset):
 
 # Dense class
 class DenseNet(torch.nn.Module):
-    def __init__(self, num_time):
+    def __init__(self):
         super().__init__()
         # self.num_time = num_time
         self.fc1_1 = torch.nn.Linear(2, 32)
@@ -111,7 +112,36 @@ def training(train_loader, model, criterion, criterion_q, optimizer):
 
         loss_mse = criterion(point_output, target_data.float())
         loss_q = criterion_q(label_output, label.long())
-        loss  =loss_mse + loss_q
+        loss = loss_mse + loss_q
+        loss.backward()
+        optimizer.step()
+
+        train_loss += loss_mse.item()
+        train_q_loss += loss_q.item()
+    ave_train_loss = train_loss / len(train_loader.dataset)
+    ave_train_q_loss = train_q_loss / len(train_loader.dataset)
+    return ave_train_loss, ave_train_q_loss
+
+def training_openloop(train_loader, model, criterion, criterion_q, optimizer, num_time, normalize_rate):
+    train_loss = 0
+    train_q_loss = 0
+    # begin = torch.tensor([])
+    # begin = torch.tensor([[0, 0]])
+    # begin = begin * normalize_rate  # range(-0.8~0.8)
+
+    for i, (input_data, target_data, label) in enumerate(train_loader):
+        model.zero_grad()
+        if i == 0:
+            begin = input_data
+        # print(begin)
+        point_output, label_output = model(begin.float())
+        begin = copy.copy(point_output)
+        label_output = label_output[:, -1]  # 最後のラベル
+        point_output = point_output[:, -1]  # 最後の出力
+        
+        loss_mse = criterion(point_output, target_data.float())
+        loss_q = criterion_q(label_output, label.long())
+        loss = loss_mse + loss_q
         loss.backward()
         optimizer.step()
 
@@ -151,10 +181,9 @@ def testing_openloop(test_loader, model, criterion, criterion_q, optimizer, num_
     val_q_loss = 0
     record_point_output = [[0, 0]]
     record_label_output = []
-    begin = torch.tensor([[-2, 0]])
+    begin = torch.tensor([[0, 0]])
     begin = begin * normalize_rate  # range(-0.8~0.8)
     for _, target_data, label in test_loader:
-        # point_output, label_output = model(input_data.float())
         point_output, label_output = model(begin.float())
         label_output = label_output[-1].reshape(1, 4)  # 最後のラベル
         if len(begin) < num_time:
@@ -242,7 +271,7 @@ def make_gif(record_point_output, record_label_output, num_div):
 def main():
     rate = 0.8
     num_div = 100
-    num_epoch = 400
+    num_epoch = 50
     num_time = 3
     num_batch = 1
     train_loss_list, train_loss_q_list = [], []
@@ -263,7 +292,7 @@ def main():
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, 
                                                 shuffle=False, num_workers=4)
 
-    model = DenseNet(num_time)
+    model = DenseNet()
     criterion = torch.nn.MSELoss()
     criterion_q = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)   # adam  lr=0.0001
@@ -271,7 +300,8 @@ def main():
     for epoch in range(num_epoch):
         # train
         model.train()
-        ave_train_loss, ave_train_q_loss = training(train_loader, model, criterion, criterion_q, optimizer)
+        # ave_train_loss, ave_train_q_loss = training(train_loader, model, criterion, criterion_q, optimizer)
+        ave_train_loss, ave_train_q_loss = training_openloop(train_loader, model, criterion, criterion_q, optimizer, num_time, normalize_rate)
 
         # eval
         model.eval()
@@ -300,7 +330,7 @@ def main():
         torch.save(optimizer.state_dict(), optim_path)
 
     # initialize parameters
-    model2 = DenseNet(num_time)
+    model2 = DenseNet()
     optimizer2 = torch.optim.Adam(model.parameters(), lr=0.0001)   # adam  lr=0.0001
     # read parameters of the model
     model_path = 'model_lissajous_dense.pth'
