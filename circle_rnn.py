@@ -18,30 +18,31 @@ def plot_normalize(points, rate):
     return points, normalize_rate
 
 class point_dataset(torch.utils.data.Dataset):
-    def __init__(self, point, is_Noise):
-        # self.point = np.concatenate(([point, point[:num_time]]))  # pointの先頭部分を後ろにつける
+    def __init__(self, point, num_div, num_loop, is_Noise):
+        self.point = np.concatenate(([point, point[:num_loop*num_div]]))  # pointの先頭部分を後ろにつける
         # self.point = np.concatenate(([point, point[:1]]))  # pointの先頭部分を後ろにつける
-        self.point = point
+        # self.point = point
         self.len = len(point)
-        # self.num_time = num_time
+        self.num_div = num_div
+        self.num_loop = num_loop
         self.is_Noise = is_Noise
 
     def __getitem__(self, index):  # 処理はここにかく
         if self.is_Noise == True:
-            # input_data = self.point[index:index+self.num_time] + np.random.normal(scale=0.001)
-            # target_data = self.point[index+self.num_time] + np.random.normal(scale=0.001)
+            input_data = self.point[index:index+self.num_div] + np.random.normal(scale=0.001)
+            target_data = self.point[index+self.num_div] + np.random.normal(scale=0.001)
             # input_data = self.point[index-1] + np.random.normal(scale=0.001)
             # target_data = self.point[index] + np.random.normal(scale=0.001)
-            input_data = self.point[:-1] + np.random.normal(scale=0.001)
-            target_data = self.point[1:] + np.random.normal(scale=0.001)
+            # input_data = self.point[:-1] + np.random.normal(scale=0.001)
+            # target_data = self.point[1:] + np.random.normal(scale=0.001)
 
         else:
-            # input_data = self.point[index:index+self.num_time]  # indexの最初と最後の部分の重複に注意
-            # target_data = self.point[index+self.num_time]
+            input_data = self.point[index:index+self.num_div]  # indexの最初と最後の部分の重複に注意
+            target_data = self.point[index+1:index+1+self.num_div]
             # input_data = self.point[index-1]
             # target_data = self.point[index]
-            input_data = self.point[:-1]  # indexの最初と最後の部分の重複に注意
-            target_data = self.point[1:]
+            # input_data = self.point[:-1]  # indexの最初と最後の部分の重複に注意
+            # target_data = self.point[1:]
         return input_data, target_data
 
     def __len__(self):
@@ -94,7 +95,7 @@ def training(train_loader, model, criterion, optimizer, model_flag):
         if model_flag == "Rnn":
             hidden = torch.zeros(1, 100, 32)  # (num_layers, num_batch, hidden_size)
             output, hidden = model(input_data.float(), hidden.float())  # by RnnNet class
-            output = output[:, -1, :]  # by RnnNet class
+            # output = output[:, -1, :]  # by RnnNet class
         elif model_flag == "Rnncell":
             hidden = torch.zeros(1, 32)  # RnncellNet class (num_batch, hidden_size)
             # for k in range(input_data.size()[0]):  # 100回で1loop
@@ -110,7 +111,9 @@ def training(train_loader, model, criterion, optimizer, model_flag):
             print("model flag Error")
             sys.exit()
         
-        loss = criterion(output[:, -1], target_data[:, -1].float())
+        # print(output[:, -1].shape, target_data[:, -1].shape)
+        # loss = criterion(output[:, -1], target_data[:, -1].float())
+        loss = criterion(output, target_data.float())
         loss.backward()
         optimizer.step()
         train_loss += loss.item()
@@ -144,14 +147,14 @@ def testing_openloop(test_loader, model, criterion, optimizer, normalize_rate, m
         # begin = begin.squeeze(0)  # by RnncellNet class
         hidden = torch.zeros(1, 32)  # RnncellNet class (num_batch, hidden_size)
     for i, (_, target_data) in enumerate(test_loader):
-        if i == 99:
-            break
+        # if i == 99:
+        #     break
 
         if model_flag == "Rnn":
             hidden = torch.zeros(1, 1, 32)  # (num_layers, num_batch, hidden_size)
             point_output, hidden = model(begin.float(), hidden.float())
             begin = point_output
-            point_output = point_output[:, 0, :]
+            # point_output = point_output[:, 0, :]
         elif model_flag == "Rnncell":
             # hidden = torch.zeros(1, 32)  # RnncellNet class (num_batch, hidden_size)
             point_output, hidden = model(begin.float(), hidden.float())
@@ -160,8 +163,9 @@ def testing_openloop(test_loader, model, criterion, optimizer, normalize_rate, m
             print("model flag Error")
             sys.exit()
 
-        # print("aa", point_output.shape, target_data[:, i].unsqueeze(0).shape)
-        loss = criterion(point_output, target_data[:, i].unsqueeze(0).float())
+        # print("aa", point_output.shape, target_data.unsqueeze(0).shape)
+        # loss = criterion(point_output, target_data[:, i].unsqueeze(0).float())
+        loss = criterion(point_output, target_data.unsqueeze(0).float())
         val_loss += loss.item()
 
         point_output = point_output / normalize_rate
@@ -176,7 +180,7 @@ def drawing_plots(normalize_points, points):
     plt.grid()
     plt.plot(points[:][0], points[:][1], color='blue', alpha=0.2)
     plt.scatter(normalize_points[:][0], normalize_points[:][1], color='orange')
-    test_fig.savefig(path + "circle_rnn_plot_0521(rnncell).png")
+    test_fig.savefig(path + "circle_rnn_plot_0521(rnn).png")
     plt.show()
 
 def drawing_loss_graph(num_epoch, train_loss_list, val_loss_list):
@@ -189,7 +193,7 @@ def drawing_loss_graph(num_epoch, train_loss_list, val_loss_list):
     plt.ylabel('loss')
     plt.title('Training and validation loss')
     plt.grid()
-    loss_fig.savefig(path + "circle_rnn_loss_0521(rnncell).png")
+    loss_fig.savefig(path + "circle_rnn_loss_0521(rnn).png")
     plt.show()
 
 def frame_update(i, record_output, gif_plot_x0, gif_plot_x1):
@@ -213,26 +217,27 @@ def make_gif(record_point_output):
     ani = animation.FuncAnimation(fig_RNN, frame_update, 
                                 fargs = (record_point_output, gif_plot_x0, gif_plot_x1), 
                                 interval = 50, frames = 100)
-    ani.save(path + "output_circle(Rnn)_drawing_0521(rnncell).gif", writer="imagemagick")
+    ani.save(path + "output_circle(Rnn)_drawing_0521(rnn).gif", writer="imagemagick")
 
 def main():
     rate = 0.8
     num_div = 100
-    num_epoch = 100
+    num_epoch = 300
+    num_loop = 100
     # num_time = 10
     num_batch = 1
     train_loss_list = []
     val_loss_list = []
-    # model_flag = "Rnn"
-    model_flag = "Rnncell"  # "Rnn" or "Rnncell"
+    model_flag = "Rnn"
+    # model_flag = "Rnncell"  # "Rnn" or "Rnncell"
     is_save = True  # save the model parameters 
 
     points = make_circle_points(num_div)
     normalize_points, normalize_rate = plot_normalize(points, rate)
-    # train_dataset = point_dataset(normalize_points, num_time, is_Noise=False)
-    # test_dataset = point_dataset(normalize_points, 1, is_Noise=True)
-    train_dataset = point_dataset(normalize_points, is_Noise=False)
-    test_dataset = point_dataset(normalize_points, is_Noise=True)
+    train_dataset = point_dataset(normalize_points, num_div, num_loop, is_Noise=False)
+    test_dataset = point_dataset(normalize_points, num_div, 1, is_Noise=True)
+    # train_dataset = point_dataset(normalize_points, is_Noise=False)
+    # test_dataset = point_dataset(normalize_points, is_Noise=True)
 
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=num_batch, 
