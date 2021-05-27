@@ -86,11 +86,11 @@ class RnncellNet(torch.nn.Module):
 
 def training(train_loader, model, criterion, optimizer, model_flag):
     train_loss = 0
-    model.zero_grad()
 
     # for batch_data in train_loader:
     #     input_data, target_data = batch_data
-    for i, (input_data, target_data) in enumerate(train_loader):    
+    for i, (input_data, target_data) in enumerate(train_loader): 
+        model.zero_grad()   
         # print(input_data.shape, target_data.shape)
         if model_flag == "Rnn":
             hidden = torch.zeros(1, 100, 32)  # (num_layers, num_batch, hidden_size)
@@ -98,13 +98,6 @@ def training(train_loader, model, criterion, optimizer, model_flag):
             # output = output[:, -1, :]  # by RnnNet class
         elif model_flag == "Rnncell":
             hidden = torch.zeros(1, 32)  # RnncellNet class (num_batch, hidden_size)
-            # for k in range(input_data.size()[0]):  # 100回で1loop
-            #     print(input_data.size()[0])
-            #     # input_cell = input_data[0, k].unsqueeze(0)
-            #     # input_cell = input_data.unsqueeze(0)
-            #     # print(input_cell.shape)
-            #     output, hidden = model(input_data.float(), hidden.float())
-            # output, hidden = model(input_data[0].float(), hidden.float())
             output, hidden = model(input_data.float(), hidden.float())
             # output = output[-1]
         else:
@@ -180,7 +173,7 @@ def drawing_plots(normalize_points, points):
     plt.grid()
     plt.plot(points[:][0], points[:][1], color='blue', alpha=0.2)
     plt.scatter(normalize_points[:][0], normalize_points[:][1], color='orange')
-    test_fig.savefig(path + "circle_rnn_plot_0521(rnn).png")
+    test_fig.savefig(path + "circle_rnn_plot_0527(rnncell).png")
     plt.show()
 
 def drawing_loss_graph(num_epoch, train_loss_list, val_loss_list):
@@ -193,7 +186,7 @@ def drawing_loss_graph(num_epoch, train_loss_list, val_loss_list):
     plt.ylabel('loss')
     plt.title('Training and validation loss')
     plt.grid()
-    loss_fig.savefig(path + "circle_rnn_loss_0521(rnn).png")
+    loss_fig.savefig(path + "circle_rnn_loss_0527(rnncell).png")
     plt.show()
 
 def frame_update(i, record_output, gif_plot_x0, gif_plot_x1):
@@ -217,19 +210,19 @@ def make_gif(record_point_output):
     ani = animation.FuncAnimation(fig_RNN, frame_update, 
                                 fargs = (record_point_output, gif_plot_x0, gif_plot_x1), 
                                 interval = 50, frames = 100)
-    ani.save(path + "output_circle(Rnn)_drawing_0521(rnn).gif", writer="imagemagick")
+    ani.save(path + "output_circle(Rnn)_drawing_0527(rnncell).gif", writer="imagemagick")
 
 def main():
     rate = 0.8
     num_div = 100
-    num_epoch = 300
-    num_loop = 100
+    num_epoch = 100
+    num_loop = 3
     # num_time = 10
     num_batch = 1
     train_loss_list = []
     val_loss_list = []
-    model_flag = "Rnn"
-    # model_flag = "Rnncell"  # "Rnn" or "Rnncell"
+    # model_flag = "Rnn"
+    model_flag = "Rnncell"  # "Rnn" or "Rnncell"
     is_save = True  # save the model parameters 
 
     points = make_circle_points(num_div)
