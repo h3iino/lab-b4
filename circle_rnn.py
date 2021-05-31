@@ -58,8 +58,8 @@ class RnnNet(torch.nn.Module):
 
     def forward(self, x, hidden):
         x, h = self.rnn(x, hidden)
-        output = self.fc(x)
-        # output = torch.tanh(self.fc(x))
+        # output = self.fc(x)
+        output = torch.tanh(self.fc(x))
         return output, h
 
 
@@ -71,27 +71,20 @@ class RnncellNet(torch.nn.Module):
 
     def forward(self, x, hidden):
         output = torch.Tensor()
-        # for idx in range(len(x)):
         for idx in range(x.shape[1]):
-            # print(idx, x.shape)
             hidden = self.rnncell(x[:, idx], hidden)
             output = torch.cat((output, hidden))
         output = output.reshape(len(x), -1, 32)
-        # output = self.fc(output)
-        # output = torch.tanh(self.fc(output[:, -1]))
         output = torch.tanh(self.fc(output))
-        # print("output", output)
         return output, hidden
 
 
 def training(train_loader, model, criterion, optimizer, model_flag):
     train_loss = 0
 
-    # for batch_data in train_loader:
-    #     input_data, target_data = batch_data
+
     for i, (input_data, target_data) in enumerate(train_loader): 
         model.zero_grad()   
-        # print(input_data.shape, target_data.shape)
         if model_flag == "Rnn":
             hidden = torch.zeros(1, 100, 32)  # (num_layers, num_batch, hidden_size)
             output, hidden = model(input_data.float(), hidden.float())  # by RnnNet class
@@ -104,8 +97,6 @@ def training(train_loader, model, criterion, optimizer, model_flag):
             print("model flag Error")
             sys.exit()
         
-        # print(output[:, -1].shape, target_data[:, -1].shape)
-        # loss = criterion(output[:, -1], target_data[:, -1].float())
         loss = criterion(output, target_data.float())
         loss.backward()
         optimizer.step()
@@ -121,7 +112,6 @@ def testing(test_loader, model, criterion, optimizer, normalize_rate):
         hidden = torch.zeros(1, 10, 32)  # (num_layers, num_batch, hidden_size)
         point_output, hidden = model(input_data.float(), hidden.float())
         point_output = point_output[:, 9, :]
-        # target_data = torch.unsqueeze(target_data, 0)
         loss = criterion(point_output, target_data.float())
         val_loss += loss.item()
 
@@ -137,11 +127,8 @@ def testing_openloop(test_loader, model, criterion, optimizer, normalize_rate, m
     begin = torch.tensor([[[-1, 0]]])
     begin = begin * normalize_rate
     if model_flag == "Rnncell":
-        # begin = begin.squeeze(0)  # by RnncellNet class
         hidden = torch.zeros(1, 32)  # RnncellNet class (num_batch, hidden_size)
     for i, (_, target_data) in enumerate(test_loader):
-        # if i == 99:
-        #     break
 
         if model_flag == "Rnn":
             hidden = torch.zeros(1, 1, 32)  # (num_layers, num_batch, hidden_size)
@@ -149,15 +136,12 @@ def testing_openloop(test_loader, model, criterion, optimizer, normalize_rate, m
             begin = point_output
             # point_output = point_output[:, 0, :]
         elif model_flag == "Rnncell":
-            # hidden = torch.zeros(1, 32)  # RnncellNet class (num_batch, hidden_size)
             point_output, hidden = model(begin.float(), hidden.float())
             begin = point_output
         else:
             print("model flag Error")
             sys.exit()
 
-        # print("aa", point_output.shape, target_data.unsqueeze(0).shape)
-        # loss = criterion(point_output, target_data[:, i].unsqueeze(0).float())
         loss = criterion(point_output, target_data.unsqueeze(0).float())
         val_loss += loss.item()
 
@@ -173,7 +157,7 @@ def drawing_plots(normalize_points, points):
     plt.grid()
     plt.plot(points[:][0], points[:][1], color='blue', alpha=0.2)
     plt.scatter(normalize_points[:][0], normalize_points[:][1], color='orange')
-    test_fig.savefig(path + "circle_rnn_plot_0527(rnncell).png")
+    test_fig.savefig(path + "circle_rnn_plot_0527(rnn).png")
     plt.show()
 
 def drawing_loss_graph(num_epoch, train_loss_list, val_loss_list):
@@ -186,7 +170,7 @@ def drawing_loss_graph(num_epoch, train_loss_list, val_loss_list):
     plt.ylabel('loss')
     plt.title('Training and validation loss')
     plt.grid()
-    loss_fig.savefig(path + "circle_rnn_loss_0527(rnncell).png")
+    loss_fig.savefig(path + "circle_rnn_loss_0527(rnn).png")
     plt.show()
 
 def frame_update(i, record_output, gif_plot_x0, gif_plot_x1):
@@ -210,14 +194,13 @@ def make_gif(record_point_output):
     ani = animation.FuncAnimation(fig_RNN, frame_update, 
                                 fargs = (record_point_output, gif_plot_x0, gif_plot_x1), 
                                 interval = 50, frames = 100)
-    ani.save(path + "output_circle(Rnn)_drawing_0527(rnncell).gif", writer="imagemagick")
+    ani.save(path + "output_circle(Rnn)_drawing_0527(rnn).gif", writer="imagemagick")
 
 def main():
     rate = 0.8
     num_div = 100
-    num_epoch = 100
+    num_epoch = 200
     num_loop = 3
-    # num_time = 10
     num_batch = 1
     train_loss_list = []
     val_loss_list = []
@@ -229,8 +212,6 @@ def main():
     normalize_points, normalize_rate = plot_normalize(points, rate)
     train_dataset = point_dataset(normalize_points, num_div, num_loop, is_Noise=False)
     test_dataset = point_dataset(normalize_points, num_div, 1, is_Noise=True)
-    # train_dataset = point_dataset(normalize_points, is_Noise=False)
-    # test_dataset = point_dataset(normalize_points, is_Noise=True)
 
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=num_batch, 
