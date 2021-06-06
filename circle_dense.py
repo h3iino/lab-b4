@@ -110,11 +110,12 @@ def testing_openloop(test_loader, model, criterion, optimizer, normalize_rate):
     ave_val_loss = val_loss / len(test_loader.dataset)
     return ave_val_loss, record_point_output
 
-def drawing_plots(points):
+def drawing_plots(normalize_points, points):
     path = 'movies/'
     test_fig = plt.figure(figsize=(6.4, 6.4))
     plt.grid()
-    plt.scatter(points[:][0], points[:][1])
+    plt.plot(points[:][0], points[:][1], color='blue', alpha=0.2)
+    plt.scatter(normalize_points[:][0], normalize_points[:][1], color='orange')
     test_fig.savefig(path + "circle_dense_plot_0509.png")
     plt.show()
 
@@ -162,9 +163,9 @@ def main():
     is_save = True  # save the model parameters 
 
     points = make_circle_points(num_div) 
-    points, normalize_rate = plot_normalize(points, rate)  # range(-0.8~0.8)
-    train_dataset = point_dataset(points, is_Noise=True)
-    test_dataset = point_dataset(points, is_Noise=False)
+    normalize_points, normalize_rate = plot_normalize(points, rate)  # range(-0.8~0.8)
+    train_dataset = point_dataset(normalize_points, is_Noise=True)
+    test_dataset = point_dataset(normalize_points, is_Noise=False)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=num_batch, 
                                                 shuffle=True, num_workers=4)
@@ -175,32 +176,32 @@ def main():
     criterion = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)   #adam  lr=0.0001
 
-    for epoch in range(num_epoch):
-        # train
-        model.train()
-        ave_train_loss = training(train_loader, model, criterion, optimizer)
-        # ave_train_loss = training_openloop(train_loader, model, criterion, 
-        #                                     optimizer, normalize_rate)
+    # for epoch in range(num_epoch):
+    #     # train
+    #     model.train()
+    #     ave_train_loss = training(train_loader, model, criterion, optimizer)
+    #     # ave_train_loss = training_openloop(train_loader, model, criterion, 
+    #     #                                     optimizer, normalize_rate)
 
-        # eval
-        model.eval()
-        # ave_val_loss, _ = testing(test_loader, model, criterion, optimizer)
-        ave_val_loss, _ = testing_openloop(test_loader, model, criterion, optimizer, normalize_rate)
-        print(f"Epoch [{epoch+1}/{num_epoch}], Loss: {ave_train_loss:.5f},"
-            f"val_loss: {ave_val_loss:.5f}")
+    #     # eval
+    #     model.eval()
+    #     # ave_val_loss, _ = testing(test_loader, model, criterion, optimizer)
+    #     ave_val_loss, _ = testing_openloop(test_loader, model, criterion, optimizer, normalize_rate)
+    #     print(f"Epoch [{epoch+1}/{num_epoch}], Loss: {ave_train_loss:.5f},"
+    #         f"val_loss: {ave_val_loss:.5f}")
         
-        # record losses
-        train_loss_list.append(ave_train_loss)
-        val_loss_list.append(ave_val_loss)
+    #     # record losses
+    #     train_loss_list.append(ave_train_loss)
+    #     val_loss_list.append(ave_val_loss)
     
-    drawing_loss_graph(num_epoch, train_loss_list, val_loss_list)
+    # drawing_loss_graph(num_epoch, train_loss_list, val_loss_list)
 
-    # save parameters of the model
-    if is_save == True:
-        model_path = 'model_circle_dense.pth'
-        optim_path = 'optim_circle_dense.pth'
-        torch.save(model.state_dict(), model_path)
-        torch.save(optimizer.state_dict(), optim_path)
+    # # save parameters of the model
+    # if is_save == True:
+    #     model_path = 'model_circle_dense.pth'
+    #     optim_path = 'optim_circle_dense.pth'
+    #     torch.save(model.state_dict(), model_path)
+    #     torch.save(optimizer.state_dict(), optim_path)
 
     # initialize parameters
     model2 = DenseNet()
@@ -210,7 +211,7 @@ def main():
     # optim_path = 'optim.pth'  # いらない
     model2.load_state_dict(torch.load(model_path))
     # optimizer2.load_state_dict(torch.load(optim_path))
-    optimizer2 = torch.optim.Adam(model.parameters(), lr=0.0001)
+    optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.0001)
 
     # test
     model2.eval()
@@ -220,7 +221,7 @@ def main():
 
     record_point_output = np.delete(record_point_output, obj=0, axis=0)  # Delete the 
                                                                          # initial value (Row: 0)
-    drawing_plots([record_point_output[:, 0], record_point_output[:, 1]])
+    drawing_plots([record_point_output[:, 0], record_point_output[:, 1]], [points[:, 0], points[:, 1]])
 
     make_gif(record_point_output)
 

@@ -76,11 +76,12 @@ class DenseNet(torch.nn.Module):
         return point_output, label_output
 
 
-def training(train_loader, model, criterion, criterion_q, optimizer):
+def training(train_loader, model, criterion, criterion_q, optimizer, num_time):
     train_loss = 0
     train_q_loss = 0
     for i, (input_data, target_data, label) in enumerate(train_loader):
         model.zero_grad()
+        input_data = input_data.reshape(1, 1, num_time*2)
         point_output, label_output = model(input_data.float())
         label_output = label_output[:, -1]  # 最後のラベル
         point_output = point_output[:, -1]  # 最後の出力
@@ -198,7 +199,7 @@ def set_color(label):
     else:
         return "red"  # red
 
-def drawing_plots(points, label):
+def drawing_plots(normalize_points, points, label):
     path = 'movies/'
     color_list = list(map(set_color, label))  # scatter color list
     test_fig = plt.figure(figsize=(12.8, 6.4))
@@ -206,8 +207,9 @@ def drawing_plots(points, label):
     plt.ylim(-1.1, 1.1)  # range of the graph
     plt.grid()
     # plt.scatter(points[:][0], points[:][1], c=label)
-    plt.scatter(points[:][0], points[:][1], c=color_list)
-    test_fig.savefig(path + "lissajous_dense_plot_0509.png")
+    plt.plot(points[:][0], points[:][1], color='blue', alpha=0.2)
+    plt.scatter(normalize_points[:][0], normalize_points[:][1], c=color_list)
+    test_fig.savefig(path + "lissajous_dense_plot_0520.png")
     plt.show()
 
 def drawing_loss_graph(num_epoch, train_loss_list, train_loss_q_list, 
@@ -223,10 +225,10 @@ def drawing_loss_graph(num_epoch, train_loss_list, train_loss_q_list,
     plt.ylabel('loss')
     plt.title('Training and validation loss')
     plt.grid()
-    loss_fig.savefig(path + "lissajous_dense_loss_0509.png")
+    loss_fig.savefig(path + "lissajous_dense_loss_0520.png")
     plt.show()
 
-def frame_update(i, record_output, gif_plot_x0, gif_plot_x1, record_label_output, color_list):
+def frame_update(i, points, record_output, gif_plot_x0, gif_plot_x1, record_label_output, color_list):
     if i != 0:
         plt.cla()  # Clear the current graph
     plt.xlim(-2.2, 2.2)  # range of the graph
@@ -238,23 +240,24 @@ def frame_update(i, record_output, gif_plot_x0, gif_plot_x1, record_label_output
     gif_plot_x0.append(record_output[i, 0])
     gif_plot_x1.append(record_output[i, 1])
     plt.grid()
+    # plt.plot(points[:][0], points[:][1], color='blue', alpha=0.2)
     im_result = plt.scatter(gif_plot_x0, gif_plot_x1, c=color_list)
 
-def make_gif(record_point_output, record_label_output, num_div):
+def make_gif(points, record_point_output, record_label_output, num_div):
     fig_RNN = plt.figure(figsize=(12.8, 6.4))
     path = 'movies/' 
     gif_plot_x0, gif_plot_x1 = [], [] 
     color_list = []  
     ani = animation.FuncAnimation(fig_RNN, frame_update, 
-                                fargs = (record_point_output, gif_plot_x0, gif_plot_x1, 
+                                fargs = (points, record_point_output, gif_plot_x0, gif_plot_x1, 
                                             record_label_output, color_list), 
                                 interval = 50, frames = num_div)
-    ani.save(path + "output_lissajous(Dense)_drawing_0509.gif", writer="imagemagick")
+    ani.save(path + "output_lissajous(Dense)_drawing_0520.gif", writer="imagemagick")
 
 def main():
     rate = 0.8
-    num_div = 99
-    num_epoch = 400
+    num_div = 100
+    num_epoch = 5000
     num_time = 2
     num_batch = 1
     train_loss_list, train_loss_q_list = [], []
@@ -262,11 +265,12 @@ def main():
     is_save = True  # save the model parameters 
 
     points = make_Lissajous_points(num_div)
-    points, normalize_rate = plot_normalize(points, rate)
+    normalize_points, normalize_rate = plot_normalize(points, rate)
     # plt.scatter(points[:, 0], points[:, 1])
     # plt.show()
-    train_dataset = point_dataset(points, num_time, is_Noise=True)
-    test_dataset = point_dataset(points, num_time, is_Noise=False)
+
+    train_dataset = point_dataset(normalize_points, num_time, is_Noise=True)
+    test_dataset = point_dataset(normalize_points, num_time, is_Noise=False)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=num_batch, 
                                                 shuffle=True, num_workers=4)
@@ -278,49 +282,49 @@ def main():
     criterion_q = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)   # adam  lr=0.0001
 
-    for epoch in range(num_epoch):
-        # train
-        model.train()
-        # ave_train_loss, ave_train_q_loss = training(train_loader, model, criterion, 
-        #                                                 criterion_q, optimizer)
-        ave_train_loss, ave_train_q_loss = training_openloop(train_loader, model, criterion, 
-                                                                criterion_q, optimizer, 
-                                                                num_time, normalize_rate)
+    # for epoch in range(num_epoch):
+    #     # train
+    #     model.train()
+    #     ave_train_loss, ave_train_q_loss = training(train_loader, model, criterion, 
+    #                                                     criterion_q, optimizer, num_time)
+    #     # ave_train_loss, ave_train_q_loss = training_openloop(train_loader, model, criterion, 
+    #     #                                                         criterion_q, optimizer, 
+    #     #                                                         num_time, normalize_rate)
 
-        # eval
-        model.eval()
-        # ave_val_loss, ave_val_q_loss, _, _ = testing(test_loader, model, criterion, criterion_q, 
-        #                                                 optimizer, normalize_rate)
-        ave_val_loss, ave_val_q_loss, record_point_output, record_label_output = testing_openloop(
-                                                                                    test_loader, 
-                                                                                    model, 
-                                                                                    criterion, 
-                                                                                    criterion_q, 
-                                                                                    optimizer, 
-                                                                                    num_time, 
-                                                                                    normalize_rate)
-        print(f"Epoch [{epoch+1}/{num_epoch}], (point)loss: {ave_train_loss:.5f},"
-            f"val_loss: {ave_val_loss:.5f} | (label)loss: {ave_train_q_loss:.5f}, {ave_val_q_loss:.5f}")
+    #     # eval
+    #     model.eval()
+    #     # ave_val_loss, ave_val_q_loss, _, _ = testing(test_loader, model, criterion, criterion_q, 
+    #     #                                                 optimizer, normalize_rate)
+    #     ave_val_loss, ave_val_q_loss, record_point_output, record_label_output = testing_openloop(
+    #                                                                                 test_loader, 
+    #                                                                                 model, 
+    #                                                                                 criterion, 
+    #                                                                                 criterion_q, 
+    #                                                                                 optimizer, 
+    #                                                                                 num_time, 
+    #                                                                                 normalize_rate)
+    #     print(f"Epoch [{epoch+1}/{num_epoch}], (point)loss: {ave_train_loss:.5f},"
+    #         f"val_loss: {ave_val_loss:.5f} | (label)loss: {ave_train_q_loss:.5f}, {ave_val_q_loss:.5f}")
 
-        # record losses
-        train_loss_list.append(ave_train_loss)
-        train_loss_q_list.append(ave_train_q_loss)
-        val_loss_list.append(ave_val_loss)
-        val_loss_q_list.append(ave_val_q_loss)
+    #     # record losses
+    #     train_loss_list.append(ave_train_loss)
+    #     train_loss_q_list.append(ave_train_q_loss)
+    #     val_loss_list.append(ave_val_loss)
+    #     val_loss_q_list.append(ave_val_q_loss)
     
-    drawing_loss_graph(num_epoch, train_loss_list, train_loss_q_list, 
-                        val_loss_list, val_loss_q_list)
+    # drawing_loss_graph(num_epoch, train_loss_list, train_loss_q_list, 
+    #                     val_loss_list, val_loss_q_list)
 
-    # save parameters of the model
-    if is_save == True:
-        model_path = 'model_lissajous_dense.pth'
-        optim_path = 'optim_lissajous_dense.pth'
-        torch.save(model.state_dict(), model_path)
-        torch.save(optimizer.state_dict(), optim_path)
+    # # save parameters of the model
+    # if is_save == True:
+    #     model_path = 'model_lissajous_dense.pth'
+    #     optim_path = 'optim_lissajous_dense.pth'
+    #     torch.save(model.state_dict(), model_path)
+    #     torch.save(optimizer.state_dict(), optim_path)
 
     # initialize parameters
     model2 = DenseNet(num_time)
-    optimizer2 = torch.optim.Adam(model.parameters(), lr=0.0001)   # adam  lr=0.0001
+    optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.0001)   # adam  lr=0.0001
     # read parameters of the model
     model_path = 'model_lissajous_dense.pth'
     model2.load_state_dict(torch.load(model_path))
@@ -343,9 +347,9 @@ def main():
     record_point_output = np.delete(record_point_output, obj=0, axis=0)  # Delete the initial 
                                                                          # value (Row: 0)
     print(record_label_output)
-    drawing_plots([record_point_output[:, 0], record_point_output[:, 1]], record_label_output)
+    drawing_plots([record_point_output[:, 0], record_point_output[:, 1]], [points[:, 0], points[:, 1]], record_label_output)
 
-    make_gif(record_point_output, record_label_output, num_div)
+    make_gif(points, record_point_output, record_label_output, num_div)
 
 if __name__ == "__main__":
     main()
