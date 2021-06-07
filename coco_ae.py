@@ -147,7 +147,7 @@ def drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss"):
     plt.ylabel('loss')
     plt.title('Training and validation ' + draw_flag)
     plt.grid()
-    loss_fig.savefig(path + "cifar10_cnn_" + draw_flag + "_0601.png")
+    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0607.png")
     plt.show()
 
 def main():
