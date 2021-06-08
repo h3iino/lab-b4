@@ -8,6 +8,8 @@ from PIL import Image
 import sys, os 
 from pycocotools.coco import COCO
 
+torch.cuda.empty_cache()
+
 # anno_path = "coco/annotations/instances_train2014.json"
 # coco = COCO(anno_path)
 
@@ -50,7 +52,7 @@ class Coco_Dataset(torch.utils.data.Dataset):
         for i in range(len(all_images)):
             self.images.append(os.path.join(root_path, all_images[i]))
             if i % 1000 == 0:
-                print('load img...', i, len(all_images))
+                print('load img...', i, '/', len(all_images))
             if i == 500:
                 print(len(self.images))
                 # print(self.images)
@@ -90,21 +92,27 @@ class Coco_Dataset(torch.utils.data.Dataset):
 class Linear_AutoEncoder(nn.Module):
 
     def __init__(self):
-        super(AutoEncoder, self).__init__()
+        super(Linear_AutoEncoder, self).__init__()
         self.Encoder = nn.Sequential(  # in(3*256*256)
-            nn.linear(3*256*256, 128*256),  # out(128*256)
+            # nn.Linear(196608, 32768),  # out(128*256)
+            nn.Linear(196608, 512),
             nn.ReLU(inplace=True),
-            nn.linear(128*256, 64*64),  # out(64*64)
-            nn.ReLU(inplace=True),
-            nn.linear(64*64, 512),  # out(512)
+            # nn.Linear(32768, 4096),  # out(64*64)
+            # nn.ReLU(inplace=True),
+            # nn.Linear(1024, 512),
+            # nn.Linear(4096, 512),  # out(512)
+            # nn.ReLU(inplace=True),
         )
         self.Decoder = nn.Sequential(
-            nn.linear(512, 64*64),
-            nn.ReLU(inplace=True),
-            nn.linear(64*64, 128*256),
-            nn.ReLU(inplace=True),
-            nn.linear(128*256, 3*256*256),
-            nn.ReLU(inplace=True),
+            # nn.Linear(512, 4096),
+            # nn.Linear(512, 1024),
+            # nn.ReLU(inplace=True),
+            # nn.Linear(4096, 32768),
+            # nn.ReLU(inplace=True),
+            nn.Linear(512, 196608),
+            # nn.Linear(32768, 196608),  # out(3"256"256)
+            # nn.ReLU(inplace=True),
+            nn.Tanh(),
         )
 
     def forward(self, x):
@@ -118,7 +126,7 @@ class Linear_AutoEncoder(nn.Module):
 class CNN_AutoEncoder(nn.Module):
 
     def __init__(self):
-        super(AutoEncoder, self).__init__()
+        super(CNN_AutoEncoder, self).__init__()
         self.Encoder = nn.Sequential(  # in(3*256*256)
             nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5),  # out(16*64*64)
             nn.ReLU(inplace=True),
@@ -171,7 +179,7 @@ class CNN_AutoEncoder(nn.Module):
         return x
 
 
-def training(train_loader, model, criterion, optimizer, device):
+def training(train_loader, model, criterion, optimizer, device, model_flag):
     train_loss = 0
     # train_acc = 0
 
@@ -179,7 +187,8 @@ def training(train_loader, model, criterion, optimizer, device):
         images = images.to(device)
         
         model.zero_grad()
-        images = images.reshape(-1, 3*256*256)
+        if model_flag == "linear":
+            images = images.reshape(-1, 3*256*256)
         outputs = model(images)
         
         loss = criterion(outputs, images)
@@ -193,7 +202,7 @@ def training(train_loader, model, criterion, optimizer, device):
     # ave_train_acc = train_acc / len(train_loader.dataset)
     return ave_train_loss
 
-def testing(test_loader, model, criterion, optimizer, device):
+def testing(test_loader, model, criterion, optimizer, device, model_flag):
     val_loss = 0
     # val_acc = 0
     outputs_and_inputs = []
@@ -201,7 +210,8 @@ def testing(test_loader, model, criterion, optimizer, device):
     for images in test_loader:
         images = images.to(device)
 
-        images = images.reshape(-1, 3*256*256)
+        if model_flag == "linear":
+            images = images.reshape(-1, 3*256*256)
         outputs = model(images)
         loss = criterion(outputs, images)
         val_loss += loss.item()
@@ -225,23 +235,30 @@ def drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss"):
     loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0607.png")
     plt.show()
 
-def show_image(img):
+def show_image(img, image_flag):
+    path = 'movies/'
     img = torchvision.utils.make_grid(img)
+    # torchvision.utils.save_image(img, "coco_AutoEncoder_" + image_flag + "_0607.png")
     img = img / 2 + 0.5
+    if image_flag == "out":
+        img = img.mul(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
+        img = img.add(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
     npimg = img.detach().numpy()
+    figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
+    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_0607.png")
     plt.show()
 
 def main():
-    num_epoch = 100
-    num_batch = 128
+    num_epoch = 50
+    num_batch = 32
     train_loss_list = []
     # train_acc_list = []
     val_loss_list = []
     # val_acc_list = []
     is_save = True  # save the model parameters 
-    model_flag = cnn
-    # model_flag = linear
+    # model_flag = "cnn"
+    model_flag = "linear"
 
     #画像の前処理を定義
     data_transforms = {
@@ -291,15 +308,17 @@ def main():
     criterion = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)   #adam  lr=0.0001
 
+    print('Start training...')
+
     for epoch in range(num_epoch):
         # train
         model.train()
-        ave_train_loss = training(train_loader, model, criterion, optimizer, device)
+        ave_train_loss = training(train_loader, model, criterion, optimizer, device, model_flag)
 
         # eval
         model.eval()
-        ave_val_loss, _ = testing(val_loader, model, criterion, optimizer, device)
-        print(f"Epoch [{epoch+1}/{num_epoch}], Loss: {ave_train_loss:.5f},"
+        ave_val_loss, _ = testing(val_loader, model, criterion, optimizer, device, model_flag)
+        print(f"Epoch [{epoch+1}/{num_epoch}], Loss: {ave_train_loss:.5f},",
             f"val_loss: {ave_val_loss:.5f}")
 
         # record losses
@@ -311,8 +330,8 @@ def main():
         # save parameters of the model
         if is_save == True:
             if (epoch+1) % 100 == 0:
-                model_path = 'model_ae_' + (epoch+1) + '.pth'
-                optim_path = 'optim_ae_' + (epoch+1) + '.pth'
+                model_path = 'model_ae_' + str(epoch+1) + '.pth'
+                optim_path = 'optim_ae_' + str(epoch+1) + '.pth'
                 torch.save(model.state_dict(), model_path)
                 torch.save(optimizer.state_dict(), optim_path)
     
@@ -320,11 +339,13 @@ def main():
     # drawing_graph(num_epoch, train_acc_list, val_acc_list, draw_flag="accuracy")
 
     # save parameters of the model
-    # if is_save == True:
-    #     model_path = 'model_ae.pth'
-    #     optim_path = 'optim_ae.pth'
-    #     torch.save(model.state_dict(), model_path)
-    #     torch.save(optimizer.state_dict(), optim_path)
+    if is_save == True:
+        model_path = 'model_ae_' + str(epoch+1) + '.pth'
+        optim_path = 'optim_ae_' + str(epoch+1) + '.pth'
+        # model_path = 'model_ae.pth'
+        # optim_path = 'optim_ae.pth'
+        torch.save(model.state_dict(), model_path)
+        torch.save(optimizer.state_dict(), optim_path)
 
     # initialize parameters
     if model_flag == "cnn":
@@ -333,18 +354,22 @@ def main():
         model2 = Linear_AutoEncoder().to(device)
     optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.001)   #adam  lr=0.0001
     # read parameters of the model
-    model_path = 'model_ae.pth'
+    # model_path = 'model_ae_50.pth'
+    model_path = 'model_ae_' + str(epoch+1) + '.pth'
     model2.load_state_dict(torch.load(model_path))
     # optimizer2.load_state_dict(torch.load(optim_path))
 
     # test
     model2.eval()
-    ave_test_loss, outputs_and_inputs = testing(test_loader, model, criterion, optimizer, device)
+    print('Test begin...')
+    ave_test_loss, outputs_and_inputs = testing(test_loader, model, criterion, optimizer, device, model_flag)
     print(f"Test Loss: {ave_test_loss:.5f}")
     # 入力画像と出力画像を表示
     output_image, input_image = outputs_and_inputs[-1]
-    show_image(input_image.reshape(-1, 3, 256, 256))
-    show_image(output_image.reshape(-1, 3, 256, 256))
+    output_image = output_image.to('cpu')
+    input_image = input_image.to('cpu')
+    show_image(input_image.reshape(-1, 3, 256, 256), image_flag="in")
+    show_image(output_image.reshape(-1, 3, 256, 256), image_flag="out")
 
 if __name__ == "__main__":
     main()
