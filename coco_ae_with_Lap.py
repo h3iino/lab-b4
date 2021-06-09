@@ -15,7 +15,8 @@ torch.cuda.empty_cache()
 # COCOデータセット
 class Coco_Dataset(torch.utils.data.Dataset):  
   
-    def __init__(self, root, transform=None, data_kind="train"):
+    def __init__(self, data_num, root, transform=None, data_kind="train"):
+        self.data_num = data_num
         # 指定する場合は前処理クラスを受け取る
         self.transform = transform[data_kind]
         # label: 80種類
@@ -47,7 +48,7 @@ class Coco_Dataset(torch.utils.data.Dataset):
             self.images.append(os.path.join(root_path, all_images[i]))
             if i % 1000 == 0:
                 print('load img...', i, '/', len(all_images))
-            if i == 500:
+            if i == self.data_num - 1:
                 print(len(self.images))
                 # print(self.images)
                 break                  
@@ -192,7 +193,7 @@ def drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss"):
     plt.ylabel('loss')
     plt.title('Training and validation ' + draw_flag)
     plt.grid()
-    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0607.png")
+    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_lap_0609.png")
     plt.show()
 
 def show_image(img, image_flag):
@@ -206,19 +207,22 @@ def show_image(img, image_flag):
     npimg = img.detach().numpy()
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_0607.png")
+    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_lap_0609.png")
     plt.show()
 
 def main():
-    num_epoch = 50
-    num_batch = 32
+    num_epoch = 100
+    num_batch = 5
+    data_train_num = 1000
+    data_val_num = 500
+    data_test_num = 500
     train_loss_list = []
     # train_acc_list = []
     val_loss_list = []
     # val_acc_list = []
     is_save = True  # save the model parameters 
-    # model_flag = "cnn"
-    model_flag = "linear"
+    model_flag = "cnn"
+    # model_flag = "linear"
 
     #画像の前処理を定義
     data_transforms = {
@@ -245,9 +249,9 @@ def main():
     }
     
     root = '../coco/images'
-    train_dataset = Coco_Dataset(root, data_transforms, data_kind='train')
-    val_dataset = Coco_Dataset(root, data_transforms, data_kind='val')
-    test_dataset = Coco_Dataset(root, data_transforms, data_kind='test')
+    train_dataset = Coco_Dataset(data_train_num, root, data_transforms, data_kind='train')
+    val_dataset = Coco_Dataset(data_val_num, root, data_transforms, data_kind='val')
+    test_dataset = Coco_Dataset(data_test_num, root, data_transforms, data_kind='test')
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=num_batch, 
                                                 shuffle=True, num_workers=2)
@@ -259,14 +263,12 @@ def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     if model_flag == "cnn":
         model = CNN_AutoEncoder().to(device)
-    else:
-        model = Linear_AutoEncoder().to(device)
     print(device)  # GPUを使えているか
     print(model)  # ネットワーク構造を記述
 
 
     # criterion = torch.nn.MSELoss()
-    criterion = LapLoss(device=device)
+    criterion = LapLoss(max_levels=3, channels=3, device=device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)   #adam  lr=0.0001
 
     print('Start training...')
@@ -291,8 +293,8 @@ def main():
         # save parameters of the model
         if is_save == True:
             if (epoch+1) % 100 == 0:
-                model_path = 'model_ae_' + str(epoch+1) + '.pth'
-                optim_path = 'optim_ae_' + str(epoch+1) + '.pth'
+                model_path = 'model_ae_lap_' + str(epoch+1) + '.pth'
+                optim_path = 'optim_ae_lap_' + str(epoch+1) + '.pth'
                 torch.save(model.state_dict(), model_path)
                 torch.save(optimizer.state_dict(), optim_path)
     
@@ -301,8 +303,8 @@ def main():
 
     # save parameters of the model
     if is_save == True:
-        model_path = 'model_ae_' + str(epoch+1) + '.pth'
-        optim_path = 'optim_ae_' + str(epoch+1) + '.pth'
+        model_path = 'model_ae_lap_' + str(epoch+1) + '.pth'
+        optim_path = 'optim_ae_lap_' + str(epoch+1) + '.pth'
         # model_path = 'model_ae.pth'
         # optim_path = 'optim_ae.pth'
         torch.save(model.state_dict(), model_path)
@@ -316,7 +318,7 @@ def main():
     optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.001)   #adam  lr=0.0001
     # read parameters of the model
     # model_path = 'model_ae_50.pth'
-    model_path = 'model_ae_' + str(epoch+1) + '.pth'
+    model_path = 'model_ae_lap_' + str(epoch+1) + '.pth'
     model2.load_state_dict(torch.load(model_path))
     # optimizer2.load_state_dict(torch.load(optim_path))
 
