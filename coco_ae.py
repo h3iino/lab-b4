@@ -235,14 +235,25 @@ def drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss"):
     loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0607.png")
     plt.show()
 
+# Min-Maxスケーリング
+def normalize_images(images):
+    result = []
+    for diff in images:
+        diff_min = torch.min(diff)
+        diff_max = torch.max(diff)
+        diff_normalize = (diff - diff_min) / (diff_max - diff_min)
+        result.append(diff_normalize)
+    return result
+
 def show_image(img, image_flag):
     path = 'movies/'
     img = torchvision.utils.make_grid(img)
     # torchvision.utils.save_image(img, "coco_AutoEncoder_" + image_flag + "_0607.png")
     img = img / 2 + 0.5
     if image_flag == "out":
-        img = img.mul(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
-        img = img.add(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
+        img = normalize_images(img)
+        # img = img.mul(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
+        # img = img.add(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
     npimg = img.detach().numpy()
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
