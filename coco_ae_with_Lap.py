@@ -19,6 +19,7 @@ class Coco_Dataset(torch.utils.data.Dataset):
         self.data_num = data_num
         # 指定する場合は前処理クラスを受け取る
         self.transform = transform[data_kind]
+        self.resize_transform = transforms.Compose([transforms.Resize(64),])
         # label: 80種類
         self.category_list = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
         # 画像を読み込むファイルパスとラベルのリスト
@@ -75,9 +76,10 @@ class Coco_Dataset(torch.utils.data.Dataset):
         # 前処理がある場合は前処理をいれる
         if self.transform is not None:
             image = self.transform(image)
+            resize_image = self.resize_transform(image)
         # 画像とラベルのペアを返却
         # return image, label
-        return image
+        return image, resize_image
         
     def __len__(self):
         # ここにはデータ数を指定
@@ -96,13 +98,19 @@ class CNN_AutoEncoder(nn.Module):
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),  # out(8*8*8)
         )
-        self.Decoder = nn.Sequential(
+        self.Decoder1 = nn.Sequential(
             nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2),  # out(8*16*16)
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(8, 16, kernel_size=4, stride=4),  # out(16*64*64)
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(16, 3, kernel_size=4, stride=4),  # out(3*256*256)
+            nn.Tanh(inplace=True),
+        )
+        self.Decoder2 = nn.Sequential(
+            nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2),  # out(8*16*16)
             nn.ReLU(inplace=True),
+            nn.ConvTranspose2d(8, 3, kernel_size=4, stride=4),  # out(3*64*64)
+            nn.Tanh(inplace=True),
         )
 
         # self.conv1 = nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5)  # out(16*64*64)
@@ -120,8 +128,9 @@ class CNN_AutoEncoder(nn.Module):
         # self.relu5 = nn.ReLU(inplace=True)
 
     def forward(self, x):
-        x = self.Encoder(x)
-        x = self.Decoder(x)
+        enc_x = self.Encoder(x)
+        dec1_x = self.Decoder1(enc_x)
+        dec2_x = self.Decoder2(enc_x)
 
         # x = self.conv1(x)
         # x = self.relu1(x)
@@ -137,22 +146,24 @@ class CNN_AutoEncoder(nn.Module):
         # x = self.t_conv3(x)
         # x = self.relu5(x)
 
-        return x
+        return dec1_x, dec2_x
 
 
 def training(train_loader, model, criterion, optimizer, device, model_flag):
     train_loss = 0
     # train_acc = 0
 
-    for i, images in enumerate(train_loader): 
+    for i, (images, resize_images) in enumerate(train_loader): 
         images = images.to(device)
         
         model.zero_grad()
         if model_flag == "linear":
             images = images.reshape(-1, 3*256*256)
-        outputs = model(images)
+        outputs, r_outputs = model(images)
         
         loss = criterion(outputs, images)
+        loss_r = criterion(r_outputs, resize_images)
+        loss = loss + loss_r
         loss.backward()
         optimizer.step()
 
@@ -213,7 +224,7 @@ def show_image(img, image_flag):
 def main():
     num_epoch = 100
     num_batch = 5
-    data_train_num = 1000
+    data_train_num = 2000
     data_val_num = 500
     data_test_num = 500
     train_loss_list = []

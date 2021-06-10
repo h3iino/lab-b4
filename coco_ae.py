@@ -21,7 +21,7 @@ torch.cuda.empty_cache()
 # COCOデータセット
 class Coco_Dataset(torch.utils.data.Dataset):  
   
-    def __init__(self, root, transform=None, data_kind="train"):
+    def __init__(self, data_num, root, transform=None, data_kind="train"):
         # 指定する場合は前処理クラスを受け取る
         self.transform = transform[data_kind]
         # label: 80種類
@@ -53,7 +53,7 @@ class Coco_Dataset(torch.utils.data.Dataset):
             self.images.append(os.path.join(root_path, all_images[i]))
             if i % 1000 == 0:
                 print('load img...', i, '/', len(all_images))
-            if i == 500:
+            if i == data_num-1:
                 print(len(self.images))
                 # print(self.images)
                 break                  
@@ -264,6 +264,9 @@ def show_image(img, image_flag):
 def main():
     num_epoch = 100
     num_batch = 32
+    data_train_num = 2000
+    data_val_num = 500
+    data_test_num = 500
     train_loss_list = []
     # train_acc_list = []
     val_loss_list = []
@@ -297,9 +300,9 @@ def main():
     }
     
     root = '../coco/images'
-    train_dataset = Coco_Dataset(root, data_transforms, data_kind='train')
-    val_dataset = Coco_Dataset(root, data_transforms, data_kind='val')
-    test_dataset = Coco_Dataset(root, data_transforms, data_kind='test')
+    train_dataset = Coco_Dataset(data_train_num, root, data_transforms, data_kind='train')
+    val_dataset = Coco_Dataset(data_val_num, root, data_transforms, data_kind='val')
+    test_dataset = Coco_Dataset(data_test_num, root, data_transforms, data_kind='test')
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=num_batch, 
                                                 shuffle=True, num_workers=2)
