@@ -250,10 +250,11 @@ def show_image(img, image_flag):
     img = torchvision.utils.make_grid(img)
     # torchvision.utils.save_image(img, "coco_AutoEncoder_" + image_flag + "_0607.png")
     img = img / 2 + 0.5
-    if image_flag == "out":
-        img = normalize_images(img)
-        # img = img.mul(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
-        # img = img.add(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
+    # npimg = np.clip(npimg, 0, 1)
+    # if image_flag == "out":
+    #     # img = normalize_images(img)
+    #     img = img.mul(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
+    #     img = img.add(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
     npimg = img.detach().numpy()
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
@@ -261,15 +262,15 @@ def show_image(img, image_flag):
     plt.show()
 
 def main():
-    num_epoch = 50
+    num_epoch = 100
     num_batch = 32
     train_loss_list = []
     # train_acc_list = []
     val_loss_list = []
     # val_acc_list = []
     is_save = True  # save the model parameters 
-    # model_flag = "cnn"
-    model_flag = "linear"
+    model_flag = "cnn"
+    # model_flag = "linear"
 
     #画像の前処理を定義
     data_transforms = {
