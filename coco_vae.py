@@ -10,14 +10,6 @@ from pycocotools.coco import COCO
 
 torch.cuda.empty_cache()
 
-# anno_path = "coco/annotations/instances_train2014.json"
-# coco = COCO(anno_path)
-
-# # try
-# cat_ids = coco.getCatIds(catNms=["dog", "cat"])  # 指定したカテゴリに対応するcategory_IDを取得する
-# # print(coco.getCatIds(supNms=["vehicle"]))
-# img_ids = coco.getImgIds(catIds=cat_ids)  # 指定したカテゴリ ID の物体がすべて存在する画像の ID 一覧を取得する。
-
 # COCOデータセット
 class Coco_Dataset(torch.utils.data.Dataset):  
   
@@ -89,10 +81,13 @@ class Coco_Dataset(torch.utils.data.Dataset):
         return len(self.images)
 
 
-class VAE(nn.Module):
+class CNN_vae(nn.Module):
 
     def __init__(self):
-        super(VAE, self).__init__()
+        super(CNN_vae, self).__init__()
+        
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        
         self.Encoder = nn.Sequential(  # in(3*256*256)
             nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5),  # out(16*64*64)
             nn.ReLU(inplace=True),
@@ -128,8 +123,7 @@ class VAE(nn.Module):
         # self.relu5 = nn.ReLU(inplace=True)
 
     def sample_z(self, x_mean, x_var):  # latent variable
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        epsilon = torch.randn(x_mean.shape).to(device)
+        epsilon = torch.randn(x_mean.shape).to(self.device)
         return x_mean + torch.sqrt(x_var) * epsilon
 
     def KL_divergence(self, mean, var):
@@ -146,7 +140,6 @@ class VAE(nn.Module):
         x = self.relu2(x)
         x = self.pool2(x)
         # x = self.Encoder(x)
-        # x_var = self.Encoder_mean(x)
         # print("----")
         
         x_mean = torch.flatten(x, 1)  # 512dim
@@ -158,7 +151,7 @@ class VAE(nn.Module):
         z = self.fc3(z)
         z = z.reshape(z.size()[0], 8, 8, 8)
         # print("z: ", z.size())
-        kl = self.KL_divergence(x_mean, x_var)
+        # kl = self.KL_divergence(x_mean, x_var)
 
         x = self.Decoder(z)
 
@@ -315,7 +308,7 @@ def main():
                                                 shuffle=False, num_workers=2)
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model = VAE().to(device)
+    model = CNN_vae().to(device)
 
     print(device)  # GPUを使えているか
     print(model)  # ネットワーク構造を記述
@@ -365,7 +358,7 @@ def main():
 
     # initialize parameters
     if model_flag == "cnn":
-        model2 = VAE().to(device)
+        model2 = CNN_vae().to(device)
     else:
         model2 = Linear_AutoEncoder().to(device)
     optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.001)   #adam  lr=0.0001
