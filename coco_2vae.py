@@ -167,6 +167,9 @@ class CNN_AutoEncoder(nn.Module):
     def sample_z(self, x_mean, x_var):
         epsilon = torch.randn(x_mean.shape).to(self.device)
         return x_mean + torch.sqrt(x_var) * epsilon
+    
+    def KL_divergence(self, mean, var):
+        return -0.5 * torch.mean(torch.sum(1 + torch.log(var) - mean**2 - var))
 
     def forward(self, x):
         x = self.Encoder(x)
@@ -177,6 +180,8 @@ class CNN_AutoEncoder(nn.Module):
         z = z.reshape(z.size()[0], 8, 8, 8)
 
         x = self.Decoder(z)
+
+        kld = KL_divergence(x_mean, x_var)
 
         # x = self.conv1(x)
         # x = self.relu1(x)
@@ -192,7 +197,7 @@ class CNN_AutoEncoder(nn.Module):
         # x = self.t_conv3(x)
         # x = self.relu5(x)
 
-        return x
+        return x, kld
 
 
 def training(train_loader, model, criterion, optimizer, device, model_flag):
@@ -205,9 +210,9 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         model.zero_grad()
         if model_flag == "linear":
             images = images.reshape(-1, 3*256*256)
-        outputs = model(images)
+        outputs, kld = model(images)
         
-        loss = criterion(outputs, images)
+        loss = criterion(outputs, images) + kld
         loss.backward()
         optimizer.step()
 
@@ -228,8 +233,8 @@ def testing(test_loader, model, criterion, optimizer, device, model_flag):
 
         if model_flag == "linear":
             images = images.reshape(-1, 3*256*256)
-        outputs = model(images)
-        loss = criterion(outputs, images)
+        outputs, kld = model(images)
+        loss = criterion(outputs, images) +kld
         val_loss += loss.item()
         # val_acc += (outputs.max(1)[1] == labels).sum().item()  #
         outputs_and_inputs.append((outputs, images))
