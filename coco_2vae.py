@@ -127,6 +127,8 @@ class CNN_AutoEncoder(nn.Module):
 
     def __init__(self):
         super(CNN_AutoEncoder, self).__init__()
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
         self.Encoder = nn.Sequential(  # in(3*256*256)
             nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5),  # out(16*64*64)
             nn.ReLU(inplace=True),
@@ -144,6 +146,10 @@ class CNN_AutoEncoder(nn.Module):
             nn.ReLU(inplace=True),
         )
 
+        self.fc1 = nn.Linear(512, 256)
+        self.fc2 = nn.Linear(512, 256)
+        self.fc3 = nn.Linear(256, 512)
+
         # self.conv1 = nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5)  # out(16*64*64)
         # self.relu1 = nn.ReLU(inplace=True)
         # self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)  # out(16*32*32)
@@ -158,8 +164,17 @@ class CNN_AutoEncoder(nn.Module):
         # self.t_conv3 = nn.ConvTranspose2d(16, 3, kernel_size=4, stride=4)  # out(3*256*256)
         # self.relu5 = nn.ReLU(inplace=True)
 
+    def sample_z(self, x_mean, x_var):
+        epsilon = torch.randn(x_mean.shape).to(self.device)
+        return x_mean + torch.sqrt(x_var) * epsilon
+
     def forward(self, x):
         x = self.Encoder(x)
+
+        x_mean = torch.flatten(x, 1)
+        x_var = torch.flatten(x, 1)
+        z = self.sample_z(x_mean, x_var)
+
         x = self.Decoder(x)
 
         # x = self.conv1(x)
@@ -262,7 +277,7 @@ def show_image(img, image_flag):
     plt.show()
 
 def main():
-    num_epoch = 100
+    num_epoch = 20
     num_batch = 32
     data_train_num = 2000
     data_val_num = 500
