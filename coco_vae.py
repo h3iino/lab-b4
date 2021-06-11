@@ -167,6 +167,7 @@ class CNN_AutoEncoder(nn.Module):
         # self.relu5 = nn.ReLU(inplace=True)
 
     def sample_z(self, mean, var):  # latent variable
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
         epsilon = torch.randn(mean.shape).to(device)
         return mean + torch.sqrt(var) * epsilon
 
@@ -177,10 +178,12 @@ class CNN_AutoEncoder(nn.Module):
         x_mean = self.Encoder_mean(x)
         x_var = self.Encoder_mean(x)
         
-        mean = nn.flatten(x_mean)  # 512dim, torch.flatten(x, 1)と同じ
-        var = nn.flatten(x_var)  # 512dim
+        mean = torch.flatten(x_mean, 1)  # 512dim
+        var = torch.flatten(x_var, 1)  # 512dim
         z = self.sample_z(mean, var)
-        kl = KL_divergence(mean, var)
+        z = z.reshape(z.size()[0], 8, 8, 8)
+        # print("z: ", z.size())
+        kl = self.KL_divergence(mean, var)
 
         x = self.Decoder(z)
 
