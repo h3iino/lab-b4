@@ -181,7 +181,7 @@ class CNN_AutoEncoder(nn.Module):
 
         x = self.Decoder(z)
 
-        kld = KL_divergence(x_mean, x_var)
+        kld = self.KL_divergence(x_mean, x_var)
 
         # x = self.conv1(x)
         # x = self.relu1(x)
