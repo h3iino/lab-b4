@@ -25,7 +25,7 @@ class Coco_Dataset(torch.utils.data.Dataset):
         # 指定する場合は前処理クラスを受け取る
         self.transform = transform[data_kind]
         # label: 80種類
-        self.category_list = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
+        # self.category_list = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
         # 画像を読み込むファイルパスとラベルのリスト
         self.images = []
         self.labels = []
@@ -134,6 +134,7 @@ class CNN_AutoEncoder(nn.Module):
             nn.Conv2d(16, 8, kernel_size=5, stride=2, padding=2),  # out(8*16*16)
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),  # out(8*8*8)
+            nn.ReLU(inplace=True),
         )
         self.Encoder_var = nn.Sequential(  # in(3*256*256)
             nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5),  # out(16*64*64)
@@ -142,6 +143,7 @@ class CNN_AutoEncoder(nn.Module):
             nn.Conv2d(16, 8, kernel_size=5, stride=2, padding=2),  # out(8*16*16)
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),  # out(8*8*8)
+            nn.ReLU(inplace=True),
         )
         self.Decoder = nn.Sequential(
             nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2),  # out(8*16*16)
