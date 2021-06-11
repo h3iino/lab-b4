@@ -186,6 +186,7 @@ class CNN_AutoEncoder(nn.Module):
 
         kld = self.KL_divergence(x_mean, x_var)
         rec_loss = self.reconstruction_loss(x, x_decode)
+        loss = kld + rec_loss
 
         # x = self.conv1(x)
         # x = self.relu1(x)
@@ -201,7 +202,7 @@ class CNN_AutoEncoder(nn.Module):
         # x = self.t_conv3(x)
         # x = self.relu5(x)
 
-        return x, kld
+        return x, loss
 
 
 def training(train_loader, model, criterion, optimizer, device, model_flag):
@@ -214,9 +215,9 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         model.zero_grad()
         if model_flag == "linear":
             images = images.reshape(-1, 3*256*256)
-        outputs, kld = model(images)
+        outputs, loss = model(images)
         
-        loss = criterion(outputs, images) + kld
+        # loss = criterion(outputs, images)
         loss.backward()
         optimizer.step()
 
@@ -237,8 +238,8 @@ def testing(test_loader, model, criterion, optimizer, device, model_flag):
 
         if model_flag == "linear":
             images = images.reshape(-1, 3*256*256)
-        outputs, kld = model(images)
-        loss = criterion(outputs, images) +kld
+        outputs, loss = model(images)
+        # loss = criterion(outputs, images)
         val_loss += loss.item()
         # val_acc += (outputs.max(1)[1] == labels).sum().item()  #
         outputs_and_inputs.append((outputs, images))
