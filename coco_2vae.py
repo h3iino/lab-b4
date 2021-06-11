@@ -171,17 +171,21 @@ class CNN_AutoEncoder(nn.Module):
     def KL_divergence(self, mean, var):
         return -0.5 * torch.mean(torch.sum(1 + torch.log(var) - mean**2 - var))
 
-    def forward(self, x):
-        x = self.Encoder(x)
+    def reconstruction_loss(self, x, x_decode)
+        return torch.mean(torch.sum((x - self.decode(x_decode)) ** 2, axis=1))
 
-        x_mean = torch.flatten(x, 1)
-        x_var = torch.flatten(x, 1)
+    def forward(self, x):
+        x_encode = self.Encoder(x)
+
+        x_mean = torch.flatten(x_encode, 1)
+        x_var = torch.flatten(x_encode, 1)
         z = self.sample_z(x_mean, x_var)
         z = z.reshape(z.size()[0], 8, 8, 8)
 
-        x = self.Decoder(z)
+        x_decode = self.Decoder(z)
 
         kld = self.KL_divergence(x_mean, x_var)
+        rec_loss = self.reconstruction_loss(x, x_decode)
 
         # x = self.conv1(x)
         # x = self.relu1(x)
