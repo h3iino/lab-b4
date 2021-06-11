@@ -174,8 +174,9 @@ class CNN_AutoEncoder(nn.Module):
         x_mean = torch.flatten(x, 1)
         x_var = torch.flatten(x, 1)
         z = self.sample_z(x_mean, x_var)
+        z = z.reshape(z.size()[0], 8, 8, 8)
 
-        x = self.Decoder(x)
+        x = self.Decoder(z)
 
         # x = self.conv1(x)
         # x = self.relu1(x)
