@@ -133,13 +133,13 @@ class VAE(nn.Module):
         return x_mean + torch.sqrt(x_var) * epsilon
 
     def KL_divergence(self, mean, var):
-        # return -0.5 * torch.mean(torch.sum(1 + torch.log(var) - mean**2 - var))
-        return 0.5 * torch.sum(mean**2 + var - torch.log(var) - 1)
+        return -0.5 * torch.mean(torch.sum(1 + torch.log(var) - mean**2 - var))
+        # return 0.5 * torch.sum(mean**2 + var - torch.log(var) - 1)
 
     def forward(self, x):
-        print(x)
+        # print(x.shape)
         x = self.conv1(x)
-        print(x)
+        # print(x.shape)
         x = self.relu1(x)
         x = self.pool1(x)
         x = self.conv2(x)
@@ -147,7 +147,6 @@ class VAE(nn.Module):
         x = self.pool2(x)
         # x = self.Encoder(x)
         # x_var = self.Encoder_mean(x)
-        print(x.size())
         # print("----")
         
         x_mean = torch.flatten(x, 1)  # 512dim
@@ -188,8 +187,6 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         images = images.to(device)
         
         model.zero_grad()
-        if model_flag == "linear":
-            images = images.reshape(-1, 3*256*256)
         outputs, mean, var = model(images)
 
         mse = criterion(outputs, images)
@@ -269,7 +266,7 @@ def show_image(img, image_flag):
 
 def main():
     num_epoch = 30
-    num_batch = 5
+    num_batch = 32
     data_train_num = 2000
     data_val_num = 500
     data_test_num = 500
@@ -318,10 +315,8 @@ def main():
                                                 shuffle=False, num_workers=2)
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    if model_flag == "cnn":
-        model = VAE().to(device)
-    else:
-        model = Linear_AutoEncoder().to(device)
+    model = VAE().to(device)
+
     print(device)  # GPUを使えているか
     print(model)  # ネットワーク構造を記述
 
