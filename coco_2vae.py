@@ -172,7 +172,7 @@ class CNN_AutoEncoder(nn.Module):
         return -0.5 * torch.mean(torch.sum(1 + torch.log(var) - mean**2 - var))
 
     def reconstruction_loss(self, x, x_decode):
-        return torch.mean(torch.sum((x - self.decode(x_decode)) ** 2, axis=1))
+        return torch.mean(torch.sum((x - x_decode) ** 2, axis=1))
 
     def forward(self, x):
         x_encode = self.Encoder(x)
