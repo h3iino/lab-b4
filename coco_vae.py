@@ -89,61 +89,17 @@ class Coco_Dataset(torch.utils.data.Dataset):
         return len(self.images)
 
 
-class Linear_AutoEncoder(nn.Module):
+class VAE(nn.Module):
 
     def __init__(self):
-        super(Linear_AutoEncoder, self).__init__()
+        super(VAE, self).__init__()
         self.Encoder = nn.Sequential(  # in(3*256*256)
-            # nn.Linear(196608, 32768),  # out(128*256)
-            nn.Linear(196608, 512),
-            nn.ReLU(inplace=True),
-            # nn.Linear(32768, 4096),  # out(64*64)
-            # nn.ReLU(inplace=True),
-            # nn.Linear(1024, 512),
-            # nn.Linear(4096, 512),  # out(512)
-            # nn.ReLU(inplace=True),
-        )
-        self.Decoder = nn.Sequential(
-            # nn.Linear(512, 4096),
-            # nn.Linear(512, 1024),
-            # nn.ReLU(inplace=True),
-            # nn.Linear(4096, 32768),
-            # nn.ReLU(inplace=True),
-            nn.Linear(512, 196608),
-            # nn.Linear(32768, 196608),  # out(3"256"256)
-            nn.ReLU(inplace=True),
-            # nn.Tanh(),
-        )
-
-    def forward(self, x):
-        # x = x.view(x.size(0), -1)  # flatten
-        x = self.Encoder(x)
-        x = self.Decoder(x)
-
-        return x
-
-
-class CNN_AutoEncoder(nn.Module):
-
-    def __init__(self):
-        super(CNN_AutoEncoder, self).__init__()
-        self.Encoder_mean = nn.Sequential(  # in(3*256*256)
             nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5),  # out(16*64*64)
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),  # out(16*32*32)
             nn.Conv2d(16, 8, kernel_size=5, stride=2, padding=2),  # out(8*16*16)
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),  # out(8*8*8)
-            nn.ReLU(inplace=True),
-        )
-        self.Encoder_var = nn.Sequential(  # in(3*256*256)
-            nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5),  # out(16*64*64)
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),  # out(16*32*32)
-            nn.Conv2d(16, 8, kernel_size=5, stride=2, padding=2),  # out(8*16*16)
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),  # out(8*8*8)
-            nn.ReLU(inplace=True),
         )
         self.Decoder = nn.Sequential(
             nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2),  # out(8*16*16)
@@ -153,13 +109,16 @@ class CNN_AutoEncoder(nn.Module):
             nn.ConvTranspose2d(16, 3, kernel_size=4, stride=4),  # out(3*256*256)
             nn.ReLU(inplace=True),
         )
+        self.fc1 = nn.Linear(512, 256)
+        self.fc2 = nn.Linear(512, 256)
+        self.fc3 = nn.Linear(256, 512)
 
-        # self.conv1 = nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5)  # out(16*64*64)
-        # self.relu1 = nn.ReLU(inplace=True)
-        # self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)  # out(16*32*32)
-        # self.conv2 = nn.Conv2d(16, 8, kernel_size=5, stride=2, padding=2)  # out(8*16*16)
-        # self.relu2 = nn.ReLU(inplace=True)
-        # self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)  # out(8*8*8)
+        self.conv1 = nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5)  # out(16*64*64)
+        self.relu1 = nn.ReLU(inplace=True)
+        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)  # out(16*32*32)
+        self.conv2 = nn.Conv2d(16, 8, kernel_size=5, stride=2, padding=2)  # out(8*16*16)
+        self.relu2 = nn.ReLU(inplace=True)
+        self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)  # out(8*8*8)
 
         # self.t_conv1 = nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2)  # out(8*16*16)
         # self.relu3 = nn.ReLU(inplace=True)
@@ -168,24 +127,39 @@ class CNN_AutoEncoder(nn.Module):
         # self.t_conv3 = nn.ConvTranspose2d(16, 3, kernel_size=4, stride=4)  # out(3*256*256)
         # self.relu5 = nn.ReLU(inplace=True)
 
-    def sample_z(self, mean, var):  # latent variable
+    def sample_z(self, x_mean, x_var):  # latent variable
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        epsilon = torch.randn(mean.shape).to(device)
-        return mean + torch.sqrt(var) * epsilon
+        epsilon = torch.randn(x_mean.shape).to(device)
+        return x_mean + torch.sqrt(x_var) * epsilon
 
     def KL_divergence(self, mean, var):
-        return -0.5 * torch.mean(torch.sum(1 + torch.log(var) - mean**2 - var))
+        # return -0.5 * torch.mean(torch.sum(1 + torch.log(var) - mean**2 - var))
+        return 0.5 * torch.sum(mean**2 + var - torch.log(var) - 1)
 
     def forward(self, x):
-        x_mean = self.Encoder_mean(x)
-        x_var = self.Encoder_mean(x)
+        print(x)
+        x = self.conv1(x)
+        print(x)
+        x = self.relu1(x)
+        x = self.pool1(x)
+        x = self.conv2(x)
+        x = self.relu2(x)
+        x = self.pool2(x)
+        # x = self.Encoder(x)
+        # x_var = self.Encoder_mean(x)
+        print(x.size())
+        # print("----")
         
-        mean = torch.flatten(x_mean, 1)  # 512dim
-        var = torch.flatten(x_var, 1)  # 512dim
-        z = self.sample_z(mean, var)
+        x_mean = torch.flatten(x, 1)  # 512dim
+        x_var = torch.flatten(x, 1)  # 512dim
+        x_mean = self.fc1(x_mean)
+        x_var = self.fc2(x_var)
+
+        z = self.sample_z(x_mean, x_var)
+        z = self.fc3(z)
         z = z.reshape(z.size()[0], 8, 8, 8)
         # print("z: ", z.size())
-        kl = self.KL_divergence(mean, var)
+        kl = self.KL_divergence(x_mean, x_var)
 
         x = self.Decoder(z)
 
@@ -203,7 +177,7 @@ class CNN_AutoEncoder(nn.Module):
         # x = self.t_conv3(x)
         # x = self.relu5(x)
 
-        return x, kl
+        return x, x_mean, x_var
 
 
 def training(train_loader, model, criterion, optimizer, device, model_flag):
@@ -216,10 +190,11 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         model.zero_grad()
         if model_flag == "linear":
             images = images.reshape(-1, 3*256*256)
-        outputs, kl = model(images)
-        
-        loss = criterion(outputs, images)
-        loss += kl  #kl-divergence
+        outputs, mean, var = model(images)
+
+        mse = criterion(outputs, images)
+        kl = model.KL_divergence(mean, var)
+        loss = kl + mse
         loss.backward()
         optimizer.step()
 
@@ -240,10 +215,11 @@ def testing(test_loader, model, criterion, optimizer, device, model_flag):
 
         if model_flag == "linear":
             images = images.reshape(-1, 3*256*256)
-        outputs, kl = model(images)
+        outputs, mean, var = model(images)
         
-        loss = criterion(outputs, images)
-        loss += kl  #kl-divergence
+        mse = criterion(outputs, images)
+        kl = model.KL_divergence(mean, var)
+        loss = kl + mse
         val_loss += loss.item()
         # val_acc += (outputs.max(1)[1] == labels).sum().item()  #
         outputs_and_inputs.append((outputs, images))
@@ -292,8 +268,8 @@ def show_image(img, image_flag):
     plt.show()
 
 def main():
-    num_epoch = 100
-    num_batch = 32
+    num_epoch = 30
+    num_batch = 5
     data_train_num = 2000
     data_val_num = 500
     data_test_num = 500
@@ -343,7 +319,7 @@ def main():
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     if model_flag == "cnn":
-        model = CNN_AutoEncoder().to(device)
+        model = VAE().to(device)
     else:
         model = Linear_AutoEncoder().to(device)
     print(device)  # GPUを使えているか
@@ -394,7 +370,7 @@ def main():
 
     # initialize parameters
     if model_flag == "cnn":
-        model2 = CNN_AutoEncoder().to(device)
+        model2 = VAE().to(device)
     else:
         model2 = Linear_AutoEncoder().to(device)
     optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.001)   #adam  lr=0.0001
