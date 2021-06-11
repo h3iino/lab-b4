@@ -111,8 +111,8 @@ class Linear_AutoEncoder(nn.Module):
             # nn.ReLU(inplace=True),
             nn.Linear(512, 196608),
             # nn.Linear(32768, 196608),  # out(3"256"256)
-            # nn.ReLU(inplace=True),
-            nn.Tanh(),
+            nn.ReLU(inplace=True),
+            # nn.Tanh(),
         )
 
     def forward(self, x):
