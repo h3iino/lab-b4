@@ -112,12 +112,12 @@ class CNN_AutoEncoder(nn.Module):
         self.Decoder2 = nn.Sequential(
             nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2),  # out(8*16*16)
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(8, 3, kernel_size=4, stride=4),  # out(3*64*64)
+            nn.ConvTranspose2d(8, 16, kernel_size=4, stride=4),  # out(3*64*64)
             nn.ReLU(inplace=True),
             # nn.Tanh(),
         )
         self.Decoder3 = nn.Sequential(
-            nn.ConvTranspose2d(8, 3, kernel_size=2, stride=2),  # out(3*16*16)
+            nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2),  # out(3*16*16)
             nn.ReLU(inplace=True),
             # nn.Tanh(),
         )
@@ -159,7 +159,7 @@ class CNN_AutoEncoder(nn.Module):
         return dec1_x, dec2_x, dec3_x
 
 
-def training(train_loader, model, criterion, optimizer, device, model_flag):
+def training(train_loader, model, criterion, criterion2, criterion3, optimizer, device, model_flag):
     train_loss = 0
     # train_acc = 0
 
@@ -174,9 +174,9 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         outputs, r64_outputs, r16_outputs = model(images)
         
         loss = criterion(outputs, images)
-        # loss_r64 = criterion(r64_outputs, resize64_images)
-        # loss_r16 = criterion(r16_outputs, resize16_images)
-        # loss = loss + loss_r64 + loss_r16
+        loss_r64 = criterion2(r64_outputs, resize64_images)
+        loss_r16 = criterion3(r16_outputs, resize16_images)
+        loss = loss + loss_r64 + loss_r16
         loss.backward()
         optimizer.step()
 
@@ -187,7 +187,7 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
     # ave_train_acc = train_acc / len(train_loader.dataset)
     return ave_train_loss
 
-def testing(test_loader, model, criterion, optimizer, device, model_flag):
+def testing(test_loader, model, criterion, criterion2, criterion3, optimizer, device, model_flag):
     val_loss = 0
     # val_acc = 0
     outputs_and_inputs = []
@@ -202,9 +202,9 @@ def testing(test_loader, model, criterion, optimizer, device, model_flag):
         outputs, r64_outputs, r16_outputs = model(images)
 
         loss = criterion(outputs, images)
-        # loss_r64 = criterion(r64_outputs, resize64_images)
-        # loss_r16 = criterion(r16_outputs, resize16_images)
-        # loss = loss + loss_r64 + loss_r16
+        loss_r64 = criterion2(r64_outputs, resize64_images)
+        loss_r16 = criterion3(r16_outputs, resize16_images)
+        loss = loss + loss_r64 + loss_r16
 
         val_loss += loss.item()
         # val_acc += (outputs.max(1)[1] == labels).sum().item()  #
@@ -300,6 +300,8 @@ def main():
 
     # criterion = torch.nn.MSELoss()
     criterion = LapLoss(max_levels=7, channels=3, device=device)
+    criterion2 = LapLoss(max_levels=3, channels=16, device=device)
+    criterion3 = LapLoss(max_levels=3, channels=8, device=device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)   #adam  lr=0.0001
 
     print('Start training...')
@@ -307,11 +309,11 @@ def main():
     for epoch in range(num_epoch):
         # train
         model.train()
-        ave_train_loss = training(train_loader, model, criterion, optimizer, device, model_flag)
+        ave_train_loss = training(train_loader, model, criterion, criterion2, criterion3, optimizer, device, model_flag)
 
         # eval
         model.eval()
-        ave_val_loss, _ = testing(val_loader, model, criterion, optimizer, device, model_flag)
+        ave_val_loss, _ = testing(val_loader, model, criterion, criterion2, criterion3, optimizer, device, model_flag)
         print(f"Epoch [{epoch+1}/{num_epoch}], Loss: {ave_train_loss:.5f},",
             f"val_loss: {ave_val_loss:.5f}")
 
@@ -356,7 +358,7 @@ def main():
     # test
     model2.eval()
     print('Test begin...')
-    ave_test_loss, outputs_and_inputs = testing(test_loader, model, criterion, optimizer, device, model_flag)
+    ave_test_loss, outputs_and_inputs = testing(test_loader, model, criterion, criterion2, criterion3, optimizer, device, model_flag)
     print(f"Test Loss: {ave_test_loss:.5f}")
     # 入力画像と出力画像を表示
     output_image, input_image = outputs_and_inputs[-1]
