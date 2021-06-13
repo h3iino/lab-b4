@@ -174,9 +174,9 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         outputs, r64_outputs, r16_outputs = model(images)
         
         loss = criterion(outputs, images)
-        loss_r64 = criterion(r64_outputs, resize64_images)
-        loss_r16 = criterion(r16_outputs, resize16_images)
-        loss = loss + loss_r64 + loss_r16
+        # loss_r64 = criterion(r64_outputs, resize64_images)
+        # loss_r16 = criterion(r16_outputs, resize16_images)
+        # loss = loss + loss_r64 + loss_r16
         loss.backward()
         optimizer.step()
 
