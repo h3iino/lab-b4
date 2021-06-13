@@ -202,9 +202,9 @@ def testing(test_loader, model, criterion, optimizer, device, model_flag):
         outputs, r64_outputs, r16_outputs = model(images)
 
         loss = criterion(outputs, images)
-        loss_r64 = criterion(r64_outputs, resize64_images)
-        loss_r16 = criterion(r16_outputs, resize16_images)
-        loss = loss + loss_r64 + loss_r16
+        # loss_r64 = criterion(r64_outputs, resize64_images)
+        # loss_r16 = criterion(r16_outputs, resize16_images)
+        # loss = loss + loss_r64 + loss_r16
 
         val_loss += loss.item()
         # val_acc += (outputs.max(1)[1] == labels).sum().item()  #
@@ -299,7 +299,7 @@ def main():
 
 
     # criterion = torch.nn.MSELoss()
-    criterion = LapLoss(max_levels=1, channels=3, device=device)
+    criterion = LapLoss(max_levels=2, channels=3, device=device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)   #adam  lr=0.0001
 
     print('Start training...')
