@@ -106,20 +106,20 @@ class CNN_AutoEncoder(nn.Module):
             nn.ConvTranspose2d(8, 16, kernel_size=4, stride=4),  # out(16*64*64)
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(16, 3, kernel_size=4, stride=4),  # out(3*256*256)
-            # nn.ReLU(inplace=True),
-            nn.Tanh(),
+            nn.ReLU(inplace=True),
+            # nn.Tanh(),
         )
         self.Decoder2 = nn.Sequential(
             nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2),  # out(8*16*16)
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(8, 3, kernel_size=4, stride=4),  # out(3*64*64)
-            # nn.ReLU(inplace=True),
-            nn.Tanh(),
+            nn.ReLU(inplace=True),
+            # nn.Tanh(),
         )
         self.Decoder3 = nn.Sequential(
             nn.ConvTranspose2d(8, 3, kernel_size=2, stride=2),  # out(3*16*16)
-            # nn.ReLU(inplace=True),
-            nn.Tanh(),
+            nn.ReLU(inplace=True),
+            # nn.Tanh(),
         )
 
         # self.conv1 = nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5)  # out(16*64*64)
