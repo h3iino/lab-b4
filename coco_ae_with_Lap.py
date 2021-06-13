@@ -106,20 +106,23 @@ class CNN_AutoEncoder(nn.Module):
             nn.ConvTranspose2d(8, 16, kernel_size=4, stride=4),  # out(16*64*64)
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(16, 3, kernel_size=4, stride=4),  # out(3*256*256)
-            nn.ReLU(inplace=True),
-            # nn.Tanh(),
+            # nn.ReLU(inplace=True),
+            # nn.Sigmoid(),
+            nn.Tanh(),
         )
         self.Decoder2 = nn.Sequential(
             nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2),  # out(8*16*16)
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(8, 16, kernel_size=4, stride=4),  # out(3*64*64)
-            nn.ReLU(inplace=True),
-            # nn.Tanh(),
+            nn.ConvTranspose2d(8, 3, kernel_size=4, stride=4),  # out(3*64*64)
+            # nn.ReLU(inplace=True),
+            # nn.Sigmoid(),
+            nn.Tanh(),
         )
         self.Decoder3 = nn.Sequential(
-            nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2),  # out(3*16*16)
-            nn.ReLU(inplace=True),
-            # nn.Tanh(),
+            nn.ConvTranspose2d(8, 3, kernel_size=2, stride=2),  # out(3*16*16)
+            # nn.ReLU(inplace=True),
+            # nn.Sigmoid(),
+            nn.Tanh(),
         )
 
         # self.conv1 = nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5)  # out(16*64*64)
@@ -242,8 +245,8 @@ def show_image(img, image_flag):
     plt.show()
 
 def main():
-    num_epoch = 30
-    num_batch = 10
+    num_epoch = 100
+    num_batch = 64
     data_train_num = 2000
     data_val_num = 500
     data_test_num = 500
@@ -300,8 +303,8 @@ def main():
 
     # criterion = torch.nn.MSELoss()
     criterion = LapLoss(max_levels=7, channels=3, device=device)
-    criterion2 = LapLoss(max_levels=3, channels=16, device=device)
-    criterion3 = LapLoss(max_levels=3, channels=8, device=device)
+    criterion2 = LapLoss(max_levels=1, channels=3, device=device)
+    criterion3 = LapLoss(max_levels=1, channels=3, device=device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)   #adam  lr=0.0001
 
     print('Start training...')
