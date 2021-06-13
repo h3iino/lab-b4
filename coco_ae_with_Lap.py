@@ -299,7 +299,7 @@ def main():
 
 
     # criterion = torch.nn.MSELoss()
-    criterion = LapLoss(max_levels=3, channels=3, device=device)
+    criterion = LapLoss(max_levels=1, channels=3, device=device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)   #adam  lr=0.0001
 
     print('Start training...')
