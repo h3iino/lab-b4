@@ -193,8 +193,8 @@ def training(train_loader, model, criterion, optimizer, device):
         # loss_r64 = criterion2(r64_outputs, resize64_images)
         # loss_r16 = criterion3(r16_outputs, resize16_images)
         loss = laploss(outputs, images, criterion)
-        loss_r64 = laploss(r64_outputs, resize64_images)
-        loss_r16 = laploss(r16_outputs, resize16_images)
+        loss_r64 = laploss(r64_outputs, resize64_images, criterion)
+        loss_r16 = laploss(r16_outputs, resize16_images, criterion)
         loss = loss + loss_r64 + loss_r16
 
         loss.backward()
@@ -223,8 +223,8 @@ def testing(test_loader, model, criterion, optimizer, device):
         # loss_r64 = criterion2(r64_outputs, resize64_images)
         # loss_r16 = criterion3(r16_outputs, resize16_images)
         loss = laploss(outputs, images, criterion)
-        loss_r64 = laploss(r64_outputs, resize64_images)
-        loss_r16 = laploss(r16_outputs, resize16_images)
+        loss_r64 = laploss(r64_outputs, resize64_images, criterion)
+        loss_r16 = laploss(r16_outputs, resize16_images, criterion)
         loss = loss + loss_r64 + loss_r16
 
         val_loss += loss.item()
