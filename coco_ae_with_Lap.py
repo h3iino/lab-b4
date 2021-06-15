@@ -179,11 +179,11 @@ class CNN_AutoEncoder(nn.Module):
 
 
 def make_edge(images):
-    downsample_func = nn.MaxPool2d(kernel_size=2, stride=2)  # 画像サイズをダウンサンプリング
-    upsample_func = nn.Upsample(scale_factor=2)  # 元のサイズに戻してぼやけ画像を取得
+    # downsample_func = nn.MaxPool2d(kernel_size=2, stride=2)  # 画像サイズをダウンサンプリング
+    downsample_func = nn.AvgPool2d(kernel_size=2, stride=2)  # 画像サイズをダウンサンプリング
+    upsample_func = nn.Upsample(scale_factor=2, mode='bilinear')  # 元のサイズに戻してぼやけ画像を取得
 
     downsample_images = downsample_func(images)
-    # downsample_images = images[:, :, ::2, ::2]
     upsample_images = upsample_func(downsample_images)
     edge = images - upsample_images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
     return edge
