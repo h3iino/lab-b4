@@ -175,8 +175,8 @@ def make_edge(images):
 def laploss(output_image, input_image, criterion):
     output_edge = make_edge(output_image)
     input_edge = make_edge(input_image)
-    input_edge = input_edge.to('cpu')
-    show_image(input_edge.reshape(-1, 3, 256, 256), image_flag="in")
+    output_edge = output_edge.to('cpu')
+    show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="in")
     loss = criterion(output_edge, input_edge)
     return loss
 
