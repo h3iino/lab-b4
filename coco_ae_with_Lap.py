@@ -323,11 +323,11 @@ def main():
     for epoch in range(num_epoch):
         # train
         model.train()
-        ave_train_loss = training(train_loader, model, criterion, criterion2, criterion3, optimizer, device)
+        ave_train_loss = training(train_loader, model, criterion, optimizer, device)
 
         # eval
         model.eval()
-        ave_val_loss, _ = testing(val_loader, model, criterion, criterion2, criterion3, optimizer, device)
+        ave_val_loss, _ = testing(val_loader, model, criterion, optimizer, device)
         print(f"Epoch [{epoch+1}/{num_epoch}], Loss: {ave_train_loss:.5f},",
             f"val_loss: {ave_val_loss:.5f}")
 
@@ -369,7 +369,7 @@ def main():
     # test
     model2.eval()
     print('Test begin...')
-    ave_test_loss, outputs_and_inputs = testing(test_loader, model, criterion, criterion2, criterion3, optimizer, device)
+    ave_test_loss, outputs_and_inputs = testing(test_loader, model, criterion, optimizer, device)
     print(f"Test Loss: {ave_test_loss:.5f}")
     # 入力画像と出力画像を表示
     output_image, input_image = outputs_and_inputs[-1]
