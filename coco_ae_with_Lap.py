@@ -124,6 +124,10 @@ class CNN_AutoEncoder(nn.Module):
             # nn.Sigmoid(),
             nn.Tanh(),
         )
+        self.fc = nn.Sequential(
+            nn.Linear(512, 256),
+            nn.Linear(256, 512),
+        )
 
         # self.conv1 = nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5)  # out(16*64*64)
         # self.relu1 = nn.ReLU(inplace=True)
@@ -141,9 +145,14 @@ class CNN_AutoEncoder(nn.Module):
 
     def forward(self, x):
         enc_x = self.Encoder(x)
-        dec1_x = self.Decoder1(enc_x)
-        dec2_x = self.Decoder2(enc_x)
-        dec3_x = self.Decoder3(enc_x)
+
+        mid_x = enc_x.reshape(-1, 512)
+        mid_x = self.fc(mid_x)
+        mid_x = mid_x.reshape(-1, 8, 8, 8)
+
+        dec1_x = self.Decoder1(mid_x)
+        dec2_x = self.Decoder2(mid_x)
+        dec3_x = self.Decoder3(mid_x)
 
         # x = self.conv1(x)
         # x = self.relu1(x)
@@ -175,8 +184,8 @@ def make_edge(images):
 def laploss(output_image, input_image, criterion):
     output_edge = make_edge(output_image)
     input_edge = make_edge(input_image)
-    output_edge = output_edge.to('cpu')
-    show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="in")
+    output_edge = output_edge.to('cpu')  # ---
+    show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="in")  # ---
     loss = criterion(output_edge, input_edge)
     return loss
 
