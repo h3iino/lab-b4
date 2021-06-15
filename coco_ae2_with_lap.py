@@ -93,8 +93,8 @@ class CNN_AutoEncoder(nn.Module):
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(16, 3, kernel_size=4, stride=4),  # out(3*256*256)
             nn.BatchNorm2d(3),
-            nn.ReLU(inplace=True),
-            # nn.Tanh(),
+            # nn.ReLU(inplace=True),
+            nn.Tanh(),
         )
         self.fc = nn.Sequential(
             nn.Linear(512, 512),
@@ -149,8 +149,8 @@ def make_edge(images):
 
     downsample_images = downsample_func(images)
     upsample_images = upsample_func(downsample_images)
-    # edge = images - upsample_images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
-    edge = upsample_images - images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
+    edge = images - upsample_images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
+    # edge = upsample_images - images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
     return edge
 
 def laploss(output_image, input_image, criterion):
