@@ -145,7 +145,8 @@ def make_edge(images):
 
     downsample_images = downsample_func(images)
     upsample_images = upsample_func(downsample_images)
-    edge = images - upsample_images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
+    # edge = images - upsample_images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
+    edge = upsample_images - images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
     return edge
 
 def laploss(output_image, input_image, criterion):
