@@ -8,7 +8,7 @@ from PIL import Image
 import sys, os 
 from pycocotools.coco import COCO
 
-from lap_pyramid_loss import LapLoss
+# from lap_pyramid_loss import LapLoss
 
 torch.cuda.empty_cache()
 
@@ -196,7 +196,7 @@ def training(train_loader, model, criterion, optimizer, device):
         loss = laploss(outputs, images, criterion)
         loss_r64 = laploss(r64_outputs, resize64_images, criterion)
         loss_r16 = laploss(r16_outputs, resize16_images, criterion)
-        loss = loss*8 + loss_r64 + loss_r16
+        loss = loss + loss_r64 + loss_r16
 
         loss.backward()
         optimizer.step()
@@ -226,7 +226,7 @@ def testing(test_loader, model, criterion, optimizer, device):
         loss = laploss(outputs, images, criterion)
         loss_r64 = laploss(r64_outputs, resize64_images, criterion)
         loss_r16 = laploss(r16_outputs, resize16_images, criterion)
-        loss = loss*8 + loss_r64 + loss_r16
+        loss = loss + loss_r64 + loss_r16
 
         val_loss += loss.item()
         # val_acc += (outputs.max(1)[1] == labels).sum().item()  #
