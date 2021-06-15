@@ -173,8 +173,8 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         model.zero_grad()
         outputs = model(images)
 
-        loss = criterion(outputs, images)
-        # loss = laploss(outputs, images, criterion)
+        # loss = criterion(outputs, images)
+        loss = laploss(outputs, images, criterion)
         loss.backward()
         optimizer.step()
 
