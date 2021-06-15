@@ -209,8 +209,8 @@ def training(train_loader, model, criterion, optimizer, device):
         # loss = criterion(outputs, images)
         # loss_r64 = criterion(r64_outputs, resize64_images)
         # loss_r16 = criterion(r16_outputs, resize16_images)
-        loss = laploss(outputs, images, criterion)
-        # loss_r64 = laploss(r64_outputs, resize64_images, criterion)
+        # loss = laploss(outputs, images, criterion)
+        loss_r64 = laploss(r64_outputs, resize64_images, criterion)
         # loss_r16 = laploss(r16_outputs, resize16_images, criterion)
         # loss = loss + loss_r64 + loss_r16
 
