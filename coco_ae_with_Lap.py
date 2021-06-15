@@ -154,6 +154,10 @@ class CNN_AutoEncoder(nn.Module):
         dec2_x = self.Decoder2(mid_x)
         dec3_x = self.Decoder3(mid_x)
 
+        dec1_edge = make_edge(dex1_x)
+        dec2_edge = make_edge(dex2_x)
+        dec3_edge = make_edge(dex3_x)
+
         # x = self.conv1(x)
         # x = self.relu1(x)
         # x = self.pool1(x)
@@ -182,7 +186,7 @@ def make_edge(images):
     return edge
 
 def laploss(output_image, input_image, criterion):
-    output_edge = make_edge(output_image)
+    # output_edge = make_edge(output_image)
     input_edge = make_edge(input_image)
     # output_edge = output_edge.to('cpu')  # ---
     # show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="--")  # ---
