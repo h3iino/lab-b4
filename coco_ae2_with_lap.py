@@ -152,8 +152,8 @@ def laploss(output_image, input_image, criterion):
     # output_edge = make_edge(output_image)
     output_edge = output_image
     input_edge = make_edge(input_image)
-    output_edge = output_edge.to('cpu')  # ---
-    show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="--")  # ---
+    # output_edge = output_edge.to('cpu')  # ---
+    # show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="--")  # ---
     loss = criterion(output_edge, input_edge)
     return loss
 
@@ -167,8 +167,8 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         model.zero_grad()
         outputs = model(images)
         
-        # loss = criterion(outputs, images)
-        loss = laploss(outputs, images, criterion)
+        loss = criterion(outputs, images)
+        # loss = laploss(outputs, images, criterion)
         loss.backward()
         optimizer.step()
 
