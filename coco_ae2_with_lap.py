@@ -173,7 +173,7 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         outputs = model(images)
         
         try_show_image(outputs)
-        try_show(make_edge(outputs))
+        try_show_image(make_edge(outputs))
 
         loss = criterion(outputs, images)
         # loss = laploss(outputs, images, criterion)
