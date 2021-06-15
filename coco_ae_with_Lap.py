@@ -164,7 +164,7 @@ class CNN_AutoEncoder(nn.Module):
 
 def make_edge(images):
     downsample_func = nn.MaxPool2d(kernel_size=2, stride=2)  # 画像サイズを半分にダウンサンプリング
-    upsample_func = nn.upsample(scale_factor=2)  # 元のサイズに戻してぼやけ画像を取得
+    upsample_func = nn.Upsample(scale_factor=2)  # 元のサイズに戻してぼやけ画像を取得
 
     downsample_images = downsample_func(images)
     upsample_images = upsample_func(downsample_images)
