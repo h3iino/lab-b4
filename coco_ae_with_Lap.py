@@ -318,7 +318,7 @@ def main():
 
 
     # criterion = torch.nn.MSELoss()
-    criterion = LapLoss(max_levels=1, channels=3, device=device)
+    criterion = LapLoss(max_levels=3, channels=3, device=device)
     # criterion = LapLoss(max_levels=7, channels=3, device=device)
     # criterion2 = LapLoss(max_levels=1, channels=3, device=device)
     # criterion3 = LapLoss(max_levels=1, channels=3, device=device)
