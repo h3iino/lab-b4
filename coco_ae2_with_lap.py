@@ -94,8 +94,8 @@ class CNN_AutoEncoder(nn.Module):
             nn.Tanh(),
         )
         self.fc = nn.Sequential(
-            nn.Linear(512, 256),
-            nn.Linear(256, 512),
+            nn.Linear(512, 512),
+            nn.Linear(512, 512),
         )
 
         # self.conv1 = nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5)  # out(16*64*64)
@@ -157,6 +157,11 @@ def laploss(output_image, input_image, criterion):
     loss = criterion(output_edge, input_edge)
     return loss
 
+def try_show_image(image):
+    image = image.to('cpu')
+    show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="--")
+    # sys.exit()
+
 def training(train_loader, model, criterion, optimizer, device, model_flag):
     train_loss = 0
     # train_acc = 0
@@ -167,6 +172,9 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         model.zero_grad()
         outputs = model(images)
         
+        try_show_image(outputs)
+        try_show(make_edge(outputs))
+
         loss = criterion(outputs, images)
         # loss = laploss(outputs, images, criterion)
         loss.backward()
@@ -187,8 +195,6 @@ def testing(test_loader, model, criterion, optimizer, device, model_flag):
     for images in test_loader:
         images = images.to(device)
 
-        if model_flag == "linear":
-            images = images.reshape(-1, 3*256*256)
         outputs = model(images)
         loss = criterion(outputs, images)
         val_loss += loss.item()
