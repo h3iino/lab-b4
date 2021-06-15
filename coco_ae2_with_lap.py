@@ -171,9 +171,6 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         
         model.zero_grad()
         outputs = model(images)
-        
-        try_show_image(outputs)
-        try_show_image(make_edge(outputs))
 
         loss = criterion(outputs, images)
         # loss = laploss(outputs, images, criterion)
@@ -182,6 +179,9 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
 
         train_loss += loss.item()
         # train_acc += (outputs.max(1)[1] == labels).sum().item()  #
+    
+    try_show_image(outputs)
+    try_show_image(make_edge(outputs))
 
     ave_train_loss = train_loss / len(train_loader.dataset)
     # ave_train_acc = train_acc / len(train_loader.dataset)
