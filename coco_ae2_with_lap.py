@@ -152,8 +152,8 @@ def laploss(output_image, input_image, criterion):
     # output_edge = make_edge(output_image)
     output_edge = output_image
     input_edge = make_edge(input_image)
-    # output_edge = output_edge.to('cpu')  # ---
-    # show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="--")  # ---
+    output_edge = output_edge.to('cpu')  # ---
+    show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="--")  # ---
     loss = criterion(output_edge, input_edge)
     return loss
 
