@@ -172,8 +172,8 @@ class CNN_AutoEncoder(nn.Module):
 
 
 def make_edge(images):
-    downsample_func = nn.MaxPool2d(kernel_size=2, stride=2)  # 画像サイズをダウンサンプリング
-    upsample_func = nn.Upsample(scale_factor=2)  # 元のサイズに戻してぼやけ画像を取得
+    downsample_func = nn.MaxPool2d(kernel_size=8, stride=8)  # 画像サイズをダウンサンプリング
+    upsample_func = nn.Upsample(scale_factor=8)  # 元のサイズに戻してぼやけ画像を取得
 
     downsample_images = downsample_func(images)
     # downsample_images = images[:, :, ::2, ::2]
@@ -184,8 +184,8 @@ def make_edge(images):
 def laploss(output_image, input_image, criterion):
     output_edge = make_edge(output_image)
     input_edge = make_edge(input_image)
-    # output_edge = output_edge.to('cpu')  # ---
-    # show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="--")  # ---
+    output_edge = output_edge.to('cpu')  # ---
+    show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="--")  # ---
     loss = criterion(output_edge, input_edge)
     return loss
 
