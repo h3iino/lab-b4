@@ -190,13 +190,13 @@ def training(train_loader, model, criterion, optimizer, device):
         model.zero_grad()
         outputs, r64_outputs, r16_outputs = model(images)
         
-        loss = criterion(outputs, images)
-        loss_r64 = criterion(r64_outputs, resize64_images)
-        loss_r16 = criterion(r16_outputs, resize16_images)
-        # loss = laploss(outputs, images, criterion)
-        # loss_r64 = laploss(r64_outputs, resize64_images, criterion)
-        # loss_r16 = laploss(r16_outputs, resize16_images, criterion)
-        loss = loss + loss_r64 + loss_r16
+        # loss = criterion(outputs, images)
+        # loss_r64 = criterion(r64_outputs, resize64_images)
+        # loss_r16 = criterion(r16_outputs, resize16_images)
+        loss = laploss(outputs, images, criterion)
+        loss_r64 = laploss(r64_outputs, resize64_images, criterion)
+        loss_r16 = laploss(r16_outputs, resize16_images, criterion)
+        loss = loss + loss_r64 + loss_r16*8
 
         loss.backward()
         optimizer.step()
@@ -220,13 +220,13 @@ def testing(test_loader, model, criterion, optimizer, device):
 
         outputs, r64_outputs, r16_outputs = model(images)
 
-        loss = criterion(outputs, images)
-        loss_r64 = criterion(r64_outputs, resize64_images)
-        loss_r16 = criterion(r16_outputs, resize16_images)
-        # loss = laploss(outputs, images, criterion)
-        # loss_r64 = laploss(r64_outputs, resize64_images, criterion)
-        # loss_r16 = laploss(r16_outputs, resize16_images, criterion)
-        loss = loss + loss_r64 + loss_r16
+        # loss = criterion(outputs, images)
+        # loss_r64 = criterion(r64_outputs, resize64_images)
+        # loss_r16 = criterion(r16_outputs, resize16_images)
+        loss = laploss(outputs, images, criterion)
+        loss_r64 = laploss(r64_outputs, resize64_images, criterion)
+        loss_r16 = laploss(r16_outputs, resize16_images, criterion)
+        loss = loss + loss_r64 + loss_r16*8
 
         val_loss += loss.item()
         # val_acc += (outputs.max(1)[1] == labels).sum().item()  #
@@ -317,8 +317,8 @@ def main():
     print(model)  # ネットワーク構造を記述
 
 
-    # criterion = torch.nn.MSELoss()
-    criterion = LapLoss(max_levels=3, channels=3, device=device)
+    criterion = torch.nn.MSELoss()
+    # criterion = LapLoss(max_levels=3, channels=3, device=device)
     # criterion = LapLoss(max_levels=7, channels=3, device=device)
     # criterion2 = LapLoss(max_levels=1, channels=3, device=device)
     # criterion3 = LapLoss(max_levels=1, channels=3, device=device)
