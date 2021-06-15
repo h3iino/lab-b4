@@ -177,7 +177,7 @@ def laploss(output_image, input_image, criterion):
     loss = criterion(output_edge, input_edge)
     return loss
 
-def training(train_loader, model, criterion, criterion2, criterion3, optimizer, device):
+def training(train_loader, model, criterion, optimizer, device):
     train_loss = 0
     # train_acc = 0
 
@@ -205,7 +205,7 @@ def training(train_loader, model, criterion, criterion2, criterion3, optimizer, 
     # ave_train_acc = train_acc / len(train_loader.dataset)
     return ave_train_loss
 
-def testing(test_loader, model, criterion, criterion2, criterion3, optimizer, device):
+def testing(test_loader, model, criterion, optimizer, device):
     val_loss = 0
     # val_acc = 0
     outputs_and_inputs = []
