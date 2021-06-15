@@ -144,8 +144,8 @@ class CNN_AutoEncoder(nn.Module):
             nn.ReLU(inplace=True),
         )
         self.fc = nn.Sequential(
-            nn.Linear(512, 256),
-            nn.Linear(256, 512),
+            nn.Linear(512, 512),
+            # nn.Linear(256, 512),
         )
 
         # self.conv1 = nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5)  # out(16*64*64)
