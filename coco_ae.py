@@ -168,7 +168,7 @@ class CNN_AutoEncoder(nn.Module):
         x = x.reshape(-1, 512)
         x = self.fc(x)
         x = x.reshape(-1, 8, 8, 8)
-        
+
         x = self.Decoder(x)
 
         # x = self.conv1(x)
@@ -241,7 +241,7 @@ def drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss"):
     plt.ylabel('loss')
     plt.title('Training and validation ' + draw_flag)
     plt.grid()
-    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0607.png")
+    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0615.png")
     plt.show()
 
 # Min-Maxスケーリング
@@ -267,7 +267,7 @@ def show_image(img, image_flag):
     npimg = img.detach().numpy()
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_0607.png")
+    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_0615.png")
     plt.show()
 
 def main():
