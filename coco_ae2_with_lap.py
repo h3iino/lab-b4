@@ -135,6 +135,7 @@ class CNN_AutoEncoder(nn.Module):
         # x = self.t_conv3(x)
         # x = self.relu5(x)
 
+        x = make_edge(x)
         return x
 
 
@@ -182,7 +183,7 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         # train_acc += (outputs.max(1)[1] == labels).sum().item()  #
     
     try_show_image(outputs)
-    try_show_image(make_edge(outputs))
+    # try_show_image(make_edge(outputs))
 
     ave_train_loss = train_loss / len(train_loader.dataset)
     # ave_train_acc = train_acc / len(train_loader.dataset)
