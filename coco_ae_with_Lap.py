@@ -162,7 +162,22 @@ class CNN_AutoEncoder(nn.Module):
         return dec1_x, dec2_x, dec3_x
 
 
-def training(train_loader, model, criterion, criterion2, criterion3, optimizer, device, model_flag):
+def make_edge(images):
+    downsample_func = nn.MaxPool2d(kernel_size=2, stride=2)  # 画像サイズを半分にダウンサンプリング
+    upsample_func = nn.upsample(scale_factor=2)  # 元のサイズに戻してぼやけ画像を取得
+
+    downsample_images = downsample_func(images)
+    upsample_images = upsample_func(downsample_images)
+    edge = images - upsample_images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
+    return edge
+
+def laploss(output_image, input_image, criterion):
+    output_edge = make_edge(output_image)
+    input_edge = make_edge(input_image)
+    loss = criterion(output_edge, input_edge)
+    return loss
+
+def training(train_loader, model, criterion, criterion2, criterion3, optimizer, device):
     train_loss = 0
     # train_acc = 0
 
@@ -172,14 +187,14 @@ def training(train_loader, model, criterion, criterion2, criterion3, optimizer, 
         resize16_images = resize16_images.to(device)
         
         model.zero_grad()
-        if model_flag == "linear":
-            images = images.reshape(-1, 3*256*256)
         outputs, r64_outputs, r16_outputs = model(images)
         
-        loss = criterion(outputs, images)
-        loss_r64 = criterion2(r64_outputs, resize64_images)
-        loss_r16 = criterion3(r16_outputs, resize16_images)
-        loss = loss + loss_r64 + loss_r16
+        # loss = criterion(outputs, images)
+        # loss_r64 = criterion2(r64_outputs, resize64_images)
+        # loss_r16 = criterion3(r16_outputs, resize16_images)
+        # loss = loss + loss_r64 + loss_r16
+        loss = laploss(outputs, images, criterion)
+
         loss.backward()
         optimizer.step()
 
@@ -190,7 +205,7 @@ def training(train_loader, model, criterion, criterion2, criterion3, optimizer, 
     # ave_train_acc = train_acc / len(train_loader.dataset)
     return ave_train_loss
 
-def testing(test_loader, model, criterion, criterion2, criterion3, optimizer, device, model_flag):
+def testing(test_loader, model, criterion, criterion2, criterion3, optimizer, device):
     val_loss = 0
     # val_acc = 0
     outputs_and_inputs = []
@@ -200,14 +215,13 @@ def testing(test_loader, model, criterion, criterion2, criterion3, optimizer, de
         resize64_images = resize64_images.to(device)
         resize16_images = resize16_images.to(device)
 
-        if model_flag == "linear":
-            images = images.reshape(-1, 3*256*256)
         outputs, r64_outputs, r16_outputs = model(images)
 
-        loss = criterion(outputs, images)
-        loss_r64 = criterion2(r64_outputs, resize64_images)
-        loss_r16 = criterion3(r16_outputs, resize16_images)
-        loss = loss + loss_r64 + loss_r16
+        # loss = criterion(outputs, images)
+        # loss_r64 = criterion2(r64_outputs, resize64_images)
+        # loss_r16 = criterion3(r16_outputs, resize16_images)
+        # loss = loss + loss_r64 + loss_r16
+        loss = laploss(outputs, images, criterion)
 
         val_loss += loss.item()
         # val_acc += (outputs.max(1)[1] == labels).sum().item()  #
@@ -255,8 +269,6 @@ def main():
     val_loss_list = []
     # val_acc_list = []
     is_save = True  # save the model parameters 
-    model_flag = "cnn"
-    # model_flag = "linear"
 
     #画像の前処理を定義
     data_transforms = {
@@ -295,16 +307,15 @@ def main():
                                                 shuffle=False, num_workers=2)
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    if model_flag == "cnn":
-        model = CNN_AutoEncoder().to(device)
+    model = CNN_AutoEncoder().to(device)
     print(device)  # GPUを使えているか
     print(model)  # ネットワーク構造を記述
 
 
-    # criterion = torch.nn.MSELoss()
-    criterion = LapLoss(max_levels=7, channels=3, device=device)
-    criterion2 = LapLoss(max_levels=1, channels=3, device=device)
-    criterion3 = LapLoss(max_levels=1, channels=3, device=device)
+    criterion = torch.nn.MSELoss()
+    # criterion = LapLoss(max_levels=7, channels=3, device=device)
+    # criterion2 = LapLoss(max_levels=1, channels=3, device=device)
+    # criterion3 = LapLoss(max_levels=1, channels=3, device=device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)   #adam  lr=0.0001
 
     print('Start training...')
@@ -312,11 +323,11 @@ def main():
     for epoch in range(num_epoch):
         # train
         model.train()
-        ave_train_loss = training(train_loader, model, criterion, criterion2, criterion3, optimizer, device, model_flag)
+        ave_train_loss = training(train_loader, model, criterion, criterion2, criterion3, optimizer, device)
 
         # eval
         model.eval()
-        ave_val_loss, _ = testing(val_loader, model, criterion, criterion2, criterion3, optimizer, device, model_flag)
+        ave_val_loss, _ = testing(val_loader, model, criterion, criterion2, criterion3, optimizer, device)
         print(f"Epoch [{epoch+1}/{num_epoch}], Loss: {ave_train_loss:.5f},",
             f"val_loss: {ave_val_loss:.5f}")
 
@@ -347,10 +358,7 @@ def main():
         torch.save(optimizer.state_dict(), optim_path)
 
     # initialize parameters
-    if model_flag == "cnn":
-        model2 = CNN_AutoEncoder().to(device)
-    else:
-        model2 = Linear_AutoEncoder().to(device)
+    model2 = CNN_AutoEncoder().to(device)
     optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.001)   #adam  lr=0.0001
     # read parameters of the model
     # model_path = 'model_ae_50.pth'
@@ -361,7 +369,7 @@ def main():
     # test
     model2.eval()
     print('Test begin...')
-    ave_test_loss, outputs_and_inputs = testing(test_loader, model, criterion, criterion2, criterion3, optimizer, device, model_flag)
+    ave_test_loss, outputs_and_inputs = testing(test_loader, model, criterion, criterion2, criterion3, optimizer, device)
     print(f"Test Loss: {ave_test_loss:.5f}")
     # 入力画像と出力画像を表示
     output_image, input_image = outputs_and_inputs[-1]
