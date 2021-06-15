@@ -190,6 +190,7 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
     
     try_show_image(images)
     try_show_image(images_e)
+    print(outputs)
     try_show_image(outputs)
     try_show_image(outputs_e)
     # try_show_image(make_edge(outputs))
