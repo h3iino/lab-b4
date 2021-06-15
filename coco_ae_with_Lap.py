@@ -8,7 +8,7 @@ from PIL import Image
 import sys, os 
 from pycocotools.coco import COCO
 
-from lap_pyramid_loss import LapLoss
+# from lap_pyramid_loss import LapLoss
 
 torch.cuda.empty_cache()
 
@@ -259,7 +259,7 @@ def show_image(img, image_flag):
     plt.show()
 
 def main():
-    num_epoch = 100
+    num_epoch = 20
     num_batch = 64
     data_train_num = 2000
     data_val_num = 500
