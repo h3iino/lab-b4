@@ -146,9 +146,10 @@ class CNN_AutoEncoder(nn.Module):
     def forward(self, x):
         enc_x = self.Encoder(x)
 
-        mid_x = enc_x.reshape(-1, 512)
-        mid_x = self.fc(mid_x)
-        mid_x = mid_x.reshape(-1, 8, 8, 8)
+        # mid_x = enc_x.reshape(-1, 512)
+        # mid_x = self.fc(mid_x)
+        # mid_x = mid_x.reshape(-1, 8, 8, 8)
+        mid_x = enc_x
 
         dec1_x = self.Decoder1(mid_x)
         dec2_x = self.Decoder2(mid_x)
@@ -172,7 +173,7 @@ class CNN_AutoEncoder(nn.Module):
         # x = self.t_conv3(x)
         # x = self.relu5(x)
 
-        return dec1_x, dec2_x, dec3_x
+        return dec1_edge, dec2_edge, dec3_edge
 
 
 def make_edge(images):
