@@ -95,10 +95,12 @@ class CNN_AutoEncoder(nn.Module):
         self.Encoder = nn.Sequential(  # in(3*256*256)
             nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5),  # out(16*64*64)
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),  # out(16*32*32)
+            # nn.MaxPool2d(kernel_size=2, stride=2),  # out(16*32*32)
+            nn.Conv2d(16, 16, kernel_size=5, stride=2, padding=2),  # out(16*32*32)
             nn.Conv2d(16, 8, kernel_size=5, stride=2, padding=2),  # out(8*16*16)
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),  # out(8*8*8)
+            # nn.MaxPool2d(kernel_size=2, stride=2),  # out(8*8*8)
+            nn.Conv2d(8, 8, kernel_size=5, stride=2, padding=2),  # out(8*8*8)
         )
         self.Decoder1 = nn.Sequential(
             nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2),  # out(8*16*16)
