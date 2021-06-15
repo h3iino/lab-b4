@@ -8,19 +8,14 @@ from PIL import Image
 import sys, os 
 from pycocotools.coco import COCO
 
-# from lap_pyramid_loss import LapLoss
-
 torch.cuda.empty_cache()
 
 # COCOデータセット
 class Coco_Dataset(torch.utils.data.Dataset):  
   
     def __init__(self, data_num, root, transform=None, data_kind="train"):
-        self.data_num = data_num
         # 指定する場合は前処理クラスを受け取る
         self.transform = transform[data_kind]
-        self.resize64_transform = transforms.Compose([transforms.Resize(64),])
-        self.resize16_transform = transforms.Compose([transforms.Resize(16),])
         # label: 80種類
         self.category_list = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
         # 画像を読み込むファイルパスとラベルのリスト
@@ -50,22 +45,11 @@ class Coco_Dataset(torch.utils.data.Dataset):
             self.images.append(os.path.join(root_path, all_images[i]))
             if i % 1000 == 0:
                 print('load img...', i, '/', len(all_images))
-            if i == self.data_num - 1:
+            if i == data_num-1:
                 print(len(self.images))
                 # print(self.images)
                 break                  
-        # for i in range(len(self.category_list)):
-        #     cat_ids = coco.getCatIds(catNms=self.category_list[i])  # 指定したカテゴリに対応するcategory_IDを取得する
-        #     img_ids = coco.getImgIds(catIds=cat_ids)  # 指定したカテゴリ ID の物体がすべて存在する画像の ID 一覧を取得する。
 
-        #     # 指定した画像 ID に対応する画像情報とラベルを取得する。
-        #     for j in range(len(img_ids)):
-        #         img_info = coco.loadImgs(img_ids)
-        #         if j % 1000 == 0:
-        #             print('load img', j, '/', len(img_ids))
-        #         self.images.append(os.path.join(root_path, '/', img_info[j]["file_name"]))
-        #         self.labels.append(self.category_list[i])
-        
     def __getitem__(self, index):
         # インデックスを元に画像のファイルパスとラベルを取得
         image = self.images[index]
@@ -77,11 +61,9 @@ class Coco_Dataset(torch.utils.data.Dataset):
         # 前処理がある場合は前処理をいれる
         if self.transform is not None:
             image = self.transform(image)
-            resize64_image = self.resize64_transform(image)
-            resize16_image = self.resize16_transform(image)
         # 画像とラベルのペアを返却
         # return image, label
-        return image, resize64_image, resize16_image
+        return image
         
     def __len__(self):
         # ここにはデータ数を指定
@@ -102,28 +84,13 @@ class CNN_AutoEncoder(nn.Module):
             # nn.MaxPool2d(kernel_size=2, stride=2),  # out(8*8*8)
             nn.Conv2d(8, 8, kernel_size=5, stride=2, padding=2),  # out(8*8*8)
         )
-        self.Decoder1 = nn.Sequential(
+        self.Decoder = nn.Sequential(
             nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2),  # out(8*16*16)
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(8, 16, kernel_size=4, stride=4),  # out(16*64*64)
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(16, 3, kernel_size=4, stride=4),  # out(3*256*256)
             # nn.ReLU(inplace=True),
-            # nn.Sigmoid(),
-            nn.Tanh(),
-        )
-        self.Decoder2 = nn.Sequential(
-            nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2),  # out(8*16*16)
-            nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(8, 3, kernel_size=4, stride=4),  # out(3*64*64)
-            # nn.ReLU(inplace=True),
-            # nn.Sigmoid(),
-            nn.Tanh(),
-        )
-        self.Decoder3 = nn.Sequential(
-            nn.ConvTranspose2d(8, 3, kernel_size=2, stride=2),  # out(3*16*16)
-            # nn.ReLU(inplace=True),
-            # nn.Sigmoid(),
             nn.Tanh(),
         )
         self.fc = nn.Sequential(
@@ -146,20 +113,13 @@ class CNN_AutoEncoder(nn.Module):
         # self.relu5 = nn.ReLU(inplace=True)
 
     def forward(self, x):
-        enc_x = self.Encoder(x)
+        x = self.Encoder(x)
 
-        # mid_x = enc_x.reshape(-1, 512)
-        # mid_x = self.fc(mid_x)
-        # mid_x = mid_x.reshape(-1, 8, 8, 8)
-        mid_x = enc_x
+        x = x.reshape(-1, 512)
+        x = self.fc(x)
+        x = x.reshape(-1, 8, 8, 8)
 
-        dec1_x = self.Decoder1(mid_x)
-        dec2_x = self.Decoder2(mid_x)
-        dec3_x = self.Decoder3(mid_x)
-
-        dec1_edge = make_edge(dec1_x)
-        dec2_edge = make_edge(dec2_x)
-        dec3_edge = make_edge(dec3_x)
+        x = self.Decoder(x)
 
         # x = self.conv1(x)
         # x = self.relu1(x)
@@ -175,7 +135,7 @@ class CNN_AutoEncoder(nn.Module):
         # x = self.t_conv3(x)
         # x = self.relu5(x)
 
-        return dec1_edge, dec2_edge, dec3_edge
+        return x
 
 
 def make_edge(images):
@@ -197,26 +157,18 @@ def laploss(output_image, input_image, criterion):
     loss = criterion(output_edge, input_edge)
     return loss
 
-def training(train_loader, model, criterion, optimizer, device):
+def training(train_loader, model, criterion, optimizer, device, model_flag):
     train_loss = 0
     # train_acc = 0
 
-    for i, (images, resize64_images, resize16_images) in enumerate(train_loader): 
+    for i, images in enumerate(train_loader): 
         images = images.to(device)
-        resize64_images = resize64_images.to(device)
-        resize16_images = resize16_images.to(device)
         
         model.zero_grad()
-        outputs, r64_outputs, r16_outputs = model(images)
+        outputs = model(images)
         
         # loss = criterion(outputs, images)
-        # loss_r64 = criterion(r64_outputs, resize64_images)
-        # loss_r16 = criterion(r16_outputs, resize16_images)
         loss = laploss(outputs, images, criterion)
-        loss_r64 = laploss(r64_outputs, resize64_images, criterion)
-        loss_r16 = laploss(r16_outputs, resize16_images, criterion)
-        loss = loss + loss_r64 + loss_r16
-
         loss.backward()
         optimizer.step()
 
@@ -227,26 +179,18 @@ def training(train_loader, model, criterion, optimizer, device):
     # ave_train_acc = train_acc / len(train_loader.dataset)
     return ave_train_loss
 
-def testing(test_loader, model, criterion, optimizer, device):
+def testing(test_loader, model, criterion, optimizer, device, model_flag):
     val_loss = 0
     # val_acc = 0
     outputs_and_inputs = []
     
-    for images, resize64_images, resize16_images in test_loader:
+    for images in test_loader:
         images = images.to(device)
-        resize64_images = resize64_images.to(device)
-        resize16_images = resize16_images.to(device)
 
-        outputs, r64_outputs, r16_outputs = model(images)
-
-        # loss = criterion(outputs, images)
-        # loss_r64 = criterion(r64_outputs, resize64_images)
-        # loss_r16 = criterion(r16_outputs, resize16_images)
-        loss = laploss(outputs, images, criterion)
-        loss_r64 = laploss(r64_outputs, resize64_images, criterion)
-        loss_r16 = laploss(r16_outputs, resize16_images, criterion)
-        loss = loss + loss_r64 + loss_r16
-
+        if model_flag == "linear":
+            images = images.reshape(-1, 3*256*256)
+        outputs = model(images)
+        loss = criterion(outputs, images)
         val_loss += loss.item()
         # val_acc += (outputs.max(1)[1] == labels).sum().item()  #
         outputs_and_inputs.append((outputs, images))
@@ -265,26 +209,38 @@ def drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss"):
     plt.ylabel('loss')
     plt.title('Training and validation ' + draw_flag)
     plt.grid()
-    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_lap_0615.png")
+    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0615.png")
     plt.show()
+
+# Min-Maxスケーリング
+def normalize_images(images):
+    result = []
+    for diff in images:
+        diff_min = torch.min(diff)
+        diff_max = torch.max(diff)
+        diff_normalize = (diff - diff_min) / (diff_max - diff_min)
+        result.append(diff_normalize)
+    return result
 
 def show_image(img, image_flag):
     path = 'movies/'
     img = torchvision.utils.make_grid(img)
     # torchvision.utils.save_image(img, "coco_AutoEncoder_" + image_flag + "_0607.png")
     img = img / 2 + 0.5
-    if image_flag == "out":
-        img = img.mul(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
-        img = img.add(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
+    # npimg = np.clip(npimg, 0, 1)
+    # if image_flag == "out":
+    #     # img = normalize_images(img)
+    #     img = img.mul(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
+    #     img = img.add(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
     npimg = img.detach().numpy()
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_lap_0615.png")
+    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_0615.png")
     plt.show()
 
 def main():
     num_epoch = 20
-    num_batch = 64
+    num_batch = 32
     data_train_num = 2000
     data_val_num = 500
     data_test_num = 500
@@ -293,6 +249,8 @@ def main():
     val_loss_list = []
     # val_acc_list = []
     is_save = True  # save the model parameters 
+    model_flag = "cnn"
+    # model_flag = "linear"
 
     #画像の前処理を定義
     data_transforms = {
@@ -331,16 +289,15 @@ def main():
                                                 shuffle=False, num_workers=2)
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model = CNN_AutoEncoder().to(device)
+    if model_flag == "cnn":
+        model = CNN_AutoEncoder().to(device)
+    else:
+        model = Linear_AutoEncoder().to(device)
     print(device)  # GPUを使えているか
     print(model)  # ネットワーク構造を記述
 
 
     criterion = torch.nn.MSELoss()
-    # criterion = LapLoss(max_levels=3, channels=3, device=device)
-    # criterion = LapLoss(max_levels=7, channels=3, device=device)
-    # criterion2 = LapLoss(max_levels=1, channels=3, device=device)
-    # criterion3 = LapLoss(max_levels=1, channels=3, device=device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)   #adam  lr=0.0001
 
     print('Start training...')
@@ -348,11 +305,11 @@ def main():
     for epoch in range(num_epoch):
         # train
         model.train()
-        ave_train_loss = training(train_loader, model, criterion, optimizer, device)
+        ave_train_loss = training(train_loader, model, criterion, optimizer, device, model_flag)
 
         # eval
         model.eval()
-        ave_val_loss, _ = testing(val_loader, model, criterion, optimizer, device)
+        ave_val_loss, _ = testing(val_loader, model, criterion, optimizer, device, model_flag)
         print(f"Epoch [{epoch+1}/{num_epoch}], Loss: {ave_train_loss:.5f},",
             f"val_loss: {ave_val_loss:.5f}")
 
@@ -365,8 +322,8 @@ def main():
         # save parameters of the model
         if is_save == True:
             if (epoch+1) % 100 == 0:
-                model_path = 'model_ae_lap_' + str(epoch+1) + '.pth'
-                optim_path = 'optim_ae_lap_' + str(epoch+1) + '.pth'
+                model_path = 'model_ae_' + str(epoch+1) + '.pth'
+                optim_path = 'optim_ae_' + str(epoch+1) + '.pth'
                 torch.save(model.state_dict(), model_path)
                 torch.save(optimizer.state_dict(), optim_path)
     
@@ -375,26 +332,29 @@ def main():
 
     # save parameters of the model
     if is_save == True:
-        model_path = 'model_ae_lap_' + str(epoch+1) + '.pth'
-        optim_path = 'optim_ae_lap_' + str(epoch+1) + '.pth'
+        model_path = 'model_ae_' + str(epoch+1) + '.pth'
+        optim_path = 'optim_ae_' + str(epoch+1) + '.pth'
         # model_path = 'model_ae.pth'
         # optim_path = 'optim_ae.pth'
         torch.save(model.state_dict(), model_path)
         torch.save(optimizer.state_dict(), optim_path)
 
     # initialize parameters
-    model2 = CNN_AutoEncoder().to(device)
+    if model_flag == "cnn":
+        model2 = CNN_AutoEncoder().to(device)
+    else:
+        model2 = Linear_AutoEncoder().to(device)
     optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.001)   #adam  lr=0.0001
     # read parameters of the model
     # model_path = 'model_ae_50.pth'
-    model_path = 'model_ae_lap_' + str(epoch+1) + '.pth'
+    model_path = 'model_ae_' + str(epoch+1) + '.pth'
     model2.load_state_dict(torch.load(model_path))
     # optimizer2.load_state_dict(torch.load(optim_path))
 
     # test
     model2.eval()
     print('Test begin...')
-    ave_test_loss, outputs_and_inputs = testing(test_loader, model, criterion, optimizer, device)
+    ave_test_loss, outputs_and_inputs = testing(test_loader, model, criterion, optimizer, device, model_flag)
     print(f"Test Loss: {ave_test_loss:.5f}")
     # 入力画像と出力画像を表示
     output_image, input_image = outputs_and_inputs[-1]
