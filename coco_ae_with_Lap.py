@@ -154,9 +154,9 @@ class CNN_AutoEncoder(nn.Module):
         dec2_x = self.Decoder2(mid_x)
         dec3_x = self.Decoder3(mid_x)
 
-        dec1_edge = make_edge(dex1_x)
-        dec2_edge = make_edge(dex2_x)
-        dec3_edge = make_edge(dex3_x)
+        dec1_edge = make_edge(dec1_x)
+        dec2_edge = make_edge(dec2_x)
+        dec3_edge = make_edge(dec3_x)
 
         # x = self.conv1(x)
         # x = self.relu1(x)
