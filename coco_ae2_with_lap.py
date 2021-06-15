@@ -159,7 +159,7 @@ def laploss(output_image, input_image, criterion):
 
 def try_show_image(image):
     image = image.to('cpu')
-    show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="--")
+    show_image(image.reshape(-1, 3, 256, 256), image_flag="--")
     # sys.exit()
 
 def training(train_loader, model, criterion, optimizer, device, model_flag):
