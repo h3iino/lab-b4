@@ -143,7 +143,8 @@ class CNN_AutoEncoder(nn.Module):
             nn.ConvTranspose2d(8, 16, kernel_size=4, stride=4),  # out(16*64*64)
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(16, 3, kernel_size=4, stride=4),  # out(3*256*256)
-            nn.ReLU(inplace=True),
+            # nn.ReLU(inplace=True),
+            nn.Tanh(),
         )
         self.fc = nn.Sequential(
             nn.Linear(512, 512),
