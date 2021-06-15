@@ -166,8 +166,8 @@ def make_edge(images):
     downsample_func = nn.MaxPool2d(kernel_size=2, stride=2)  # 画像サイズをダウンサンプリング
     upsample_func = nn.Upsample(scale_factor=2)  # 元のサイズに戻してぼやけ画像を取得
 
-    # downsample_images = downsample_func(images)
-    downsample_images = images[:, :, ::2, ::2]
+    downsample_images = downsample_func(images)
+    # downsample_images = images[:, :, ::2, ::2]
     upsample_images = upsample_func(downsample_images)
     edge = images - upsample_images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
     return edge
@@ -175,6 +175,7 @@ def make_edge(images):
 def laploss(output_image, input_image, criterion):
     output_edge = make_edge(output_image)
     input_edge = make_edge(input_image)
+    show_image(input_edge.reshape(-1, 3, 256, 256), image_flag="in")
     loss = criterion(output_edge, input_edge)
     return loss
 
@@ -194,9 +195,9 @@ def training(train_loader, model, criterion, optimizer, device):
         # loss_r64 = criterion(r64_outputs, resize64_images)
         # loss_r16 = criterion(r16_outputs, resize16_images)
         loss = laploss(outputs, images, criterion)
-        loss_r64 = laploss(r64_outputs, resize64_images, criterion)
-        loss_r16 = laploss(r16_outputs, resize16_images, criterion)
-        loss = loss + loss_r64 + loss_r16
+        # loss_r64 = laploss(r64_outputs, resize64_images, criterion)
+        # loss_r16 = laploss(r16_outputs, resize16_images, criterion)
+        # loss = loss + loss_r64 + loss_r16
 
         loss.backward()
         optimizer.step()
@@ -224,9 +225,9 @@ def testing(test_loader, model, criterion, optimizer, device):
         # loss_r64 = criterion(r64_outputs, resize64_images)
         # loss_r16 = criterion(r16_outputs, resize16_images)
         loss = laploss(outputs, images, criterion)
-        loss_r64 = laploss(r64_outputs, resize64_images, criterion)
-        loss_r16 = laploss(r16_outputs, resize16_images, criterion)
-        loss = loss + loss_r64 + loss_r16
+        # loss_r64 = laploss(r64_outputs, resize64_images, criterion)
+        # loss_r16 = laploss(r16_outputs, resize16_images, criterion)
+        # loss = loss + loss_r64 + loss_r16
 
         val_loss += loss.item()
         # val_acc += (outputs.max(1)[1] == labels).sum().item()  #
