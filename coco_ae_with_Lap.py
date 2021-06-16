@@ -217,7 +217,7 @@ def laploss(output_image, input_image, criterion, stages):
     input_edge = []
     output_edge = []
     loss = 0
-    for i in range(1, stage+1):
+    for i in range(1, stages+1):
         input_edge.append(make_edge(input_image, 2**i))
         output_edge.append(make_edge(output_image, 2**i))
         loss += criterion(input_edge[i-1], output_edge[i-1])
