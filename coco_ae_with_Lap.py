@@ -242,7 +242,7 @@ def training(train_loader, model, criterion, optimizer, device):
     train_loss = 0
     # train_acc = 0
 
-    for i, (images, resize64_images, resize32_image, resize16_images) in enumerate(train_loader): 
+    for i, (images, resize64_images, resize32_images, resize16_images) in enumerate(train_loader): 
         images = images.to(device)
         resize64_images = resize64_images.to(device)
         resize32_images = resize32_images.to(device)
