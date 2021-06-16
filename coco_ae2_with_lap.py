@@ -196,6 +196,12 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         train_loss += loss.item()
         # train_acc += (outputs.max(1)[1] == labels).sum().item()  #
     
+    try_show_image(make_edge(images, 8))
+    try_show_image(make_edge(images, 4))
+    try_show_image(make_edge(images, 2))
+    try_show_image(make_edge(outputs, 8))
+    try_show_image(make_edge(outputs, 4))
+    try_show_image(make_edge(outputs, 2))
     # try_show_image(images)
     # try_show_image(images_e)
     # try_show_image(outputs)
@@ -215,7 +221,8 @@ def testing(test_loader, model, criterion, optimizer, device, model_flag):
         images = images.to(device)
 
         outputs = model(images)
-        loss = criterion(outputs, images)
+        # loss = criterion(outputs, images)
+        loss = laploss(outputs, images, criterion)
         val_loss += loss.item()
         # val_acc += (outputs.max(1)[1] == labels).sum().item()  #
         outputs_and_inputs.append((outputs, images))
@@ -266,7 +273,7 @@ def show_image(img, image_flag):
     plt.show()
 
 def main():
-    num_epoch = 20
+    num_epoch = 10
     num_batch = 32
     data_train_num = 2000
     data_val_num = 500
