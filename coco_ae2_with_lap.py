@@ -190,7 +190,6 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
     
     try_show_image(images)
     try_show_image(images_e)
-    print(outputs)
     try_show_image(outputs)
     try_show_image(outputs_e)
     # try_show_image(make_edge(outputs))
@@ -250,7 +249,7 @@ def show_image(img, image_flag):
     #     # img = normalize_images(img)
     #     img = img.mul(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
     #     img = img.add(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
-    npimg = img.detach().numpy()
+    npimg = img.detach().numpy(d_type='float64')
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_0615.png")
