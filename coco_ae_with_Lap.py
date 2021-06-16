@@ -8,8 +8,6 @@ from PIL import Image
 import sys, os 
 from pycocotools.coco import COCO
 
-# from lap_pyramid_loss import LapLoss
-
 torch.cuda.empty_cache()
 
 # COCOデータセット
@@ -53,19 +51,7 @@ class Coco_Dataset(torch.utils.data.Dataset):
                 print('load img...', i, '/', len(all_images))
             if i == self.data_num - 1:
                 print(len(self.images))
-                # print(self.images)
                 break                  
-        # for i in range(len(self.category_list)):
-        #     cat_ids = coco.getCatIds(catNms=self.category_list[i])  # 指定したカテゴリに対応するcategory_IDを取得する
-        #     img_ids = coco.getImgIds(catIds=cat_ids)  # 指定したカテゴリ ID の物体がすべて存在する画像の ID 一覧を取得する。
-
-        #     # 指定した画像 ID に対応する画像情報とラベルを取得する。
-        #     for j in range(len(img_ids)):
-        #         img_info = coco.loadImgs(img_ids)
-        #         if j % 1000 == 0:
-        #             print('load img', j, '/', len(img_ids))
-        #         self.images.append(os.path.join(root_path, '/', img_info[j]["file_name"]))
-        #         self.labels.append(self.category_list[i])
         
     def __getitem__(self, index):
         # インデックスを元に画像のファイルパスとラベルを取得
@@ -159,19 +145,15 @@ class CNN_AutoEncoder(nn.Module):
     def forward(self, x):
         enc_x = self.Encoder(x)
 
-        # mid_x = enc_x.reshape(-1, 512)
-        # mid_x = self.fc(mid_x)
-        # mid_x = mid_x.reshape(-1, 8, 8, 8)
-        mid_x = enc_x
+        mid_x = enc_x.reshape(-1, 512)
+        mid_x = self.fc(mid_x)
+        mid_x = mid_x.reshape(-1, 8, 8, 8)
+        # mid_x = enc_x
 
         dec1_x = self.Decoder1(mid_x)
         dec2_x = self.Decoder2(mid_x)
         dec3_x = self.Decoder3(mid_x)
         dec4_x = self.Decoder4(mid_x)
-
-        # dec1_edge = make_edge(dec1_x)
-        # dec2_edge = make_edge(dec2_x)
-        # dec3_edge = make_edge(dec3_x)
 
         # x = self.conv1(x)
         # x = self.relu1(x)
@@ -187,18 +169,8 @@ class CNN_AutoEncoder(nn.Module):
         # x = self.t_conv3(x)
         # x = self.relu5(x)
 
-        # return dec1_edge, dec2_edge, dec3_edge
         return dec1_x, dec2_x, dec3_x, dec4_x
 
-def normalize_edge(diff):
-    result = []
-    # for diff in images:
-    diff_min = torch.min(diff)
-    diff_max = torch.max(diff)
-    diff_normalize = (diff - diff_min) / (diff_max - diff_min)
-        # result.append(diff_normalize)
-    # return result
-    return diff_normalize
 
 def make_edge(images, rate):
     # downsample_func = nn.MaxPool2d(kernel_size=2, stride=2)  # 画像サイズをダウンサンプリング
@@ -208,9 +180,6 @@ def make_edge(images, rate):
     downsample_images = downsample_func(images)
     upsample_images = upsample_func(downsample_images)
     edge = images - upsample_images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
-    # edge = upsample_images - images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
-    # edge = torch.trunc(edge * 255)
-    # edge = normalize_edge(edge)
     return edge
 
 def laploss(output_image, input_image, criterion, stages):
@@ -222,15 +191,6 @@ def laploss(output_image, input_image, criterion, stages):
         output_edge.append(make_edge(output_image, 2**i))
         loss += criterion(input_edge[i-1], output_edge[i-1])
 
-    # output_edge = output_edge.to('cpu')  # ---
-    # show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="--")  # ---
-    # loss_2 = criterion(output_edge_2, input_edge_2)
-    # loss_4 = criterion(output_edge_4, input_edge_4)
-    # loss_8 = criterion(output_edge_8, input_edge_8)
-    # loss_16 = criterion(output_edge_16, input_edge_16)
-    # loss_32 = criterion(output_edge_32, input_edge_32)
-    # loss_64 = criterion(output_edge_64, input_edge_64)
-    # loss = loss_2 + loss_4 + loss_8 + loss_16 + loss_32 + loss_64
     return loss
 
 def try_show_image(image):
@@ -292,11 +252,9 @@ def testing(test_loader, model, criterion, optimizer, device):
         loss = loss + loss_lap256 + loss_lap64 + loss_lap32 + loss_lap16
 
         val_loss += loss.item()
-        # val_acc += (outputs.max(1)[1] == labels).sum().item()  #
         outputs_and_inputs.append((outputs, images))
        
     ave_val_loss = val_loss / len(test_loader.dataset)
-    # ave_val_acc = val_acc / len(test_loader.dataset)
     return ave_val_loss, outputs_and_inputs
 
 def drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss"):
@@ -381,10 +339,6 @@ def main():
 
 
     criterion = torch.nn.MSELoss()
-    # criterion = LapLoss(max_levels=3, channels=3, device=device)
-    # criterion = LapLoss(max_levels=7, channels=3, device=device)
-    # criterion2 = LapLoss(max_levels=1, channels=3, device=device)
-    # criterion3 = LapLoss(max_levels=1, channels=3, device=device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)   #adam  lr=0.0001
 
     print('Start training...')
@@ -402,9 +356,7 @@ def main():
 
         # record losses
         train_loss_list.append(ave_train_loss)
-        # train_acc_list.append(ave_train_acc)
         val_loss_list.append(ave_val_loss)
-        # val_acc_list.append(ave_val_acc)
 
         # save parameters of the model
         if is_save == True:
@@ -415,14 +367,11 @@ def main():
                 torch.save(optimizer.state_dict(), optim_path)
     
     drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss")
-    # drawing_graph(num_epoch, train_acc_list, val_acc_list, draw_flag="accuracy")
 
     # save parameters of the model
     if is_save == True:
         model_path = 'model_ae_lap_' + str(epoch+1) + '.pth'
         optim_path = 'optim_ae_lap_' + str(epoch+1) + '.pth'
-        # model_path = 'model_ae.pth'
-        # optim_path = 'optim_ae.pth'
         torch.save(model.state_dict(), model_path)
         torch.save(optimizer.state_dict(), optim_path)
 
@@ -430,10 +379,8 @@ def main():
     model2 = CNN_AutoEncoder().to(device)
     optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.001)   #adam  lr=0.0001
     # read parameters of the model
-    # model_path = 'model_ae_50.pth'
     model_path = 'model_ae_lap_' + str(epoch+1) + '.pth'
     model2.load_state_dict(torch.load(model_path))
-    # optimizer2.load_state_dict(torch.load(optim_path))
 
     # test
     model2.eval()
