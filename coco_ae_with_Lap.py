@@ -201,7 +201,6 @@ def laploss(output_image, input_image, criterion):
         output_edge.append(make_edge(output_image, 2**i))
         loss += criterion(input_edge[i-1], output_edge[i-1])
 
-
     # output_edge = output_edge.to('cpu')  # ---
     # show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="--")  # ---
     # loss_2 = criterion(output_edge_2, input_edge_2)
@@ -213,6 +212,10 @@ def laploss(output_image, input_image, criterion):
     # loss = loss_2 + loss_4 + loss_8 + loss_16 + loss_32 + loss_64
     return loss
 
+def try_show_image(image):
+    image = image.to('cpu')
+    show_image(image.reshape(-1, 3, 256, 256), image_flag="--")
+    # sys.exit()
 
 def training(train_loader, model, criterion, optimizer, device):
     train_loss = 0
@@ -239,6 +242,9 @@ def training(train_loader, model, criterion, optimizer, device):
 
         train_loss += loss.item()
         # train_acc += (outputs.max(1)[1] == labels).sum().item()  #
+    
+    # try_show_image(make_edge(outputs, 64))
+    try_show_image(outputs)
 
     ave_train_loss = train_loss / len(train_loader.dataset)
     # ave_train_acc = train_acc / len(train_loader.dataset)
@@ -300,7 +306,7 @@ def show_image(img, image_flag):
     plt.show()
 
 def main():
-    num_epoch = 20
+    num_epoch = 10
     num_batch = 64
     data_train_num = 2000
     data_val_num = 500
