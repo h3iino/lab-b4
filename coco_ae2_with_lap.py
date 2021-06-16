@@ -152,33 +152,28 @@ def make_edge(images, rate):
     edge = images - upsample_images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
     # edge = upsample_images - images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
     # edge = torch.trunc(edge * 255)
-    edge = normalize_images(edge)
+    # edge = normalize_images(edge)
     return edge
 
 def laploss(output_image, input_image, criterion):
-    output_edge_2 = make_edge(output_image, 2)
-    # output_edge = output_image
-    input_edge_2 = make_edge(input_image, 2)
-    # input_edge = input_image
-    output_edge_4 = make_edge(output_image, 4)
-    input_edge_4 = make_edge(input_image, 4)
-    output_edge_8 = make_edge(output_image, 8)
-    input_edge_8 = make_edge(input_image, 8)
-    output_edge_16 = make_edge(output_image, 16)
-    input_edge_16 = make_edge(input_image, 16)
-    output_edge_32 = make_edge(output_image, 32)
-    input_edge_32 = make_edge(input_image, 32)
-    output_edge_64 = make_edge(output_image, 64)
-    input_edge_64 = make_edge(input_image, 64)
+    input_edge = []
+    output_edge = []
+    loss = 0
+    for i in range(1, 6):
+        input_edge.append(make_edge(input_image), 2**i)
+        output_edge.append(make_edge(output_image), 2**i)
+        loss += criterion(input_edge[i-1], output_edge[i-1])
+
+
     # output_edge = output_edge.to('cpu')  # ---
     # show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="--")  # ---
-    loss_2 = criterion(output_edge_2, input_edge_2)
-    loss_4 = criterion(output_edge_4, input_edge_4)
-    loss_8 = criterion(output_edge_8, input_edge_8)
-    loss_16 = criterion(output_edge_16, input_edge_16)
-    loss_32 = criterion(output_edge_32, input_edge_32)
-    loss_64 = criterion(output_edge_64, input_edge_64)
-    loss = loss_2 + loss_4 + loss_8 + loss_16 + loss_32 + loss_64
+    # loss_2 = criterion(output_edge_2, input_edge_2)
+    # loss_4 = criterion(output_edge_4, input_edge_4)
+    # loss_8 = criterion(output_edge_8, input_edge_8)
+    # loss_16 = criterion(output_edge_16, input_edge_16)
+    # loss_32 = criterion(output_edge_32, input_edge_32)
+    # loss_64 = criterion(output_edge_64, input_edge_64)
+    # loss = loss_2 + loss_4 + loss_8 + loss_16 + loss_32 + loss_64
     return loss
 
 def try_show_image(image):
