@@ -167,6 +167,8 @@ def laploss(output_image, input_image, criterion):
     input_edge_16 = make_edge(input_image, 16)
     output_edge_32 = make_edge(output_image, 32)
     input_edge_32 = make_edge(input_image, 32)
+    output_edge_64 = make_edge(output_image, 64)
+    input_edge_64 = make_edge(input_image, 64)
     # output_edge = output_edge.to('cpu')  # ---
     # show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="--")  # ---
     loss_2 = criterion(output_edge_2, input_edge_2)
@@ -174,7 +176,8 @@ def laploss(output_image, input_image, criterion):
     loss_8 = criterion(output_edge_8, input_edge_8)
     loss_16 = criterion(output_edge_16, input_edge_16)
     loss_32 = criterion(output_edge_32, input_edge_32)
-    loss = loss_2 + loss_4 + loss_8 + loss_16 + loss_32
+    loss_64 = criterion(output_edge_64, input_edge_64)
+    loss = loss_2 + loss_4 + loss_8 + loss_16 + loss_32 + loss_64
     return loss
 
 def try_show_image(image):
@@ -202,16 +205,16 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         train_loss += loss.item()
         # train_acc += (outputs.max(1)[1] == labels).sum().item()  #
     
-    try_show_image(make_edge(images, 32))
-    try_show_image(make_edge(images, 16))
-    try_show_image(make_edge(images, 8))
-    try_show_image(make_edge(images, 4))
-    try_show_image(make_edge(images, 2))
-    try_show_image(make_edge(outputs, 32))
-    try_show_image(make_edge(outputs, 16))
-    try_show_image(make_edge(outputs, 8))
-    try_show_image(make_edge(outputs, 4))
-    try_show_image(make_edge(outputs, 2))
+    # try_show_image(make_edge(images, 32))
+    # try_show_image(make_edge(images, 16))
+    # try_show_image(make_edge(images, 8))
+    # try_show_image(make_edge(images, 4))
+    # try_show_image(make_edge(images, 2))
+    try_show_image(make_edge(outputs, 64))
+    # try_show_image(make_edge(outputs, 16))
+    # try_show_image(make_edge(outputs, 8))
+    # try_show_image(make_edge(outputs, 4))
+    # try_show_image(make_edge(outputs, 2))
     # try_show_image(images)
     # try_show_image(images_e)
     # try_show_image(outputs)
