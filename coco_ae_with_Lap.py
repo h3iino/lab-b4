@@ -157,9 +157,9 @@ class CNN_AutoEncoder(nn.Module):
         dec2_x = self.Decoder2(mid_x)
         dec3_x = self.Decoder3(mid_x)
 
-        dec1_edge = make_edge(dec1_x)
-        dec2_edge = make_edge(dec2_x)
-        dec3_edge = make_edge(dec3_x)
+        # dec1_edge = make_edge(dec1_x)
+        # dec2_edge = make_edge(dec2_x)
+        # dec3_edge = make_edge(dec3_x)
 
         # x = self.conv1(x)
         # x = self.relu1(x)
@@ -175,7 +175,8 @@ class CNN_AutoEncoder(nn.Module):
         # x = self.t_conv3(x)
         # x = self.relu5(x)
 
-        return dec1_edge, dec2_edge, dec3_edge
+        # return dec1_edge, dec2_edge, dec3_edge
+        return dec1_x, dec2_x, dec3_x
 
 
 def make_edge(images):
@@ -186,16 +187,30 @@ def make_edge(images):
     downsample_images = downsample_func(images)
     upsample_images = upsample_func(downsample_images)
     edge = images - upsample_images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
+    # edge = normalize_images(edge)
     return edge
 
 def laploss(output_image, input_image, criterion):
-    # output_edge = make_edge(output_image)
-    output_edge = output_image
-    input_edge = make_edge(input_image)
+    input_edge = []
+    output_edge = []
+    loss = 0
+    for i in range(1, 6):
+        input_edge.append(make_edge(input_image, 2**i))
+        output_edge.append(make_edge(output_image, 2**i))
+        loss += criterion(input_edge[i-1], output_edge[i-1])
+
+
     # output_edge = output_edge.to('cpu')  # ---
     # show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="--")  # ---
-    loss = criterion(output_edge, input_edge)
+    # loss_2 = criterion(output_edge_2, input_edge_2)
+    # loss_4 = criterion(output_edge_4, input_edge_4)
+    # loss_8 = criterion(output_edge_8, input_edge_8)
+    # loss_16 = criterion(output_edge_16, input_edge_16)
+    # loss_32 = criterion(output_edge_32, input_edge_32)
+    # loss_64 = criterion(output_edge_64, input_edge_64)
+    # loss = loss_2 + loss_4 + loss_8 + loss_16 + loss_32 + loss_64
     return loss
+
 
 def training(train_loader, model, criterion, optimizer, device):
     train_loss = 0
