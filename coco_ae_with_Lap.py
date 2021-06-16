@@ -178,6 +178,15 @@ class CNN_AutoEncoder(nn.Module):
         # return dec1_edge, dec2_edge, dec3_edge
         return dec1_x, dec2_x, dec3_x
 
+def normalize_edge(diff):
+    result = []
+    # for diff in images:
+    diff_min = torch.min(diff)
+    diff_max = torch.max(diff)
+    diff_normalize = (diff - diff_min) / (diff_max - diff_min)
+        # result.append(diff_normalize)
+    # return result
+    return diff_normalize
 
 def make_edge(images, rate):
     # downsample_func = nn.MaxPool2d(kernel_size=2, stride=2)  # 画像サイズをダウンサンプリング
@@ -189,7 +198,7 @@ def make_edge(images, rate):
     edge = images - upsample_images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
     # edge = upsample_images - images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
     # edge = torch.trunc(edge * 255)
-    # edge = normalize_images(edge)
+    edge = normalize_edge(edge)
     return edge
 
 def laploss(output_image, input_image, criterion):
