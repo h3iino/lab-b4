@@ -179,14 +179,16 @@ class CNN_AutoEncoder(nn.Module):
         return dec1_x, dec2_x, dec3_x
 
 
-def make_edge(images):
+def make_edge(images, rate):
     # downsample_func = nn.MaxPool2d(kernel_size=2, stride=2)  # 画像サイズをダウンサンプリング
-    downsample_func = nn.AvgPool2d(kernel_size=2, stride=2)  # 画像サイズをダウンサンプリング
-    upsample_func = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)  # 元のサイズに戻してぼやけ画像を取得
+    downsample_func = nn.AvgPool2d(kernel_size=rate, stride=rate)  # 画像サイズをダウンサンプリング
+    upsample_func = nn.Upsample(scale_factor=rate, mode='bilinear', align_corners=True)  # 元のサイズに戻してぼやけ画像を取得
 
     downsample_images = downsample_func(images)
     upsample_images = upsample_func(downsample_images)
     edge = images - upsample_images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
+    # edge = upsample_images - images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
+    # edge = torch.trunc(edge * 255)
     # edge = normalize_images(edge)
     return edge
 
