@@ -142,10 +142,10 @@ class CNN_AutoEncoder(nn.Module):
         return x
 
 
-def make_edge(images):
+def make_edge(images, rate):
     # downsample_func = nn.MaxPool2d(kernel_size=2, stride=2)  # 画像サイズをダウンサンプリング
-    downsample_func = nn.AvgPool2d(kernel_size=2, stride=2)  # 画像サイズをダウンサンプリング
-    upsample_func = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)  # 元のサイズに戻してぼやけ画像を取得
+    downsample_func = nn.AvgPool2d(kernel_size=rate, stride=rate)  # 画像サイズをダウンサンプリング
+    upsample_func = nn.Upsample(scale_factor=rate, mode='bilinear', align_corners=True)  # 元のサイズに戻してぼやけ画像を取得
 
     downsample_images = downsample_func(images)
     upsample_images = upsample_func(downsample_images)
@@ -155,13 +155,20 @@ def make_edge(images):
     return edge
 
 def laploss(output_image, input_image, criterion):
-    # output_edge = make_edge(output_image)
-    output_edge = output_image
-    # input_edge = make_edge(input_image)
-    input_edge = input_image
+    output_edge_2 = make_edge(output_image, 2)
+    # output_edge = output_image
+    input_edge_2 = make_edge(input_image, 2)
+    # input_edge = input_image
+    output_edge_4 = make_edge(output_image, 4)
+    input_edge_4 = make_edge(input_image, 4)
+    output_edge_8 = make_edge(output_image, 8)
+    input_edge_8 = make_edge(input_image, 8)
     # output_edge = output_edge.to('cpu')  # ---
     # show_image(output_edge.reshape(-1, 3, 256, 256), image_flag="--")  # ---
-    loss = criterion(output_edge, input_edge)
+    loss_2 = criterion(output_edge_2, input_edge_2)
+    loss_4 = criterion(output_edge_4, input_edge_4)
+    loss_8 = criterion(output_edge_8, input_edge_8)
+    loss = loss_2 + loss_4 + loss_8
     return loss
 
 def try_show_image(image):
@@ -180,9 +187,9 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         outputs = model(images)
 
         # loss = criterion(outputs, images)
-        outputs_e = make_edge(outputs)
-        images_e = make_edge(images)
-        loss = laploss(outputs_e, images_e, criterion)
+        outputs_e = make_edge(outputs, 8)
+        images_e = make_edge(images, 8)
+        loss = laploss(outputs, images, criterion)
         loss.backward()
         optimizer.step()
 
