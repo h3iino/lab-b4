@@ -198,7 +198,7 @@ def make_edge(images, rate):
     edge = images - upsample_images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
     # edge = upsample_images - images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
     # edge = torch.trunc(edge * 255)
-    edge = normalize_edge(edge)
+    # edge = normalize_edge(edge)
     return edge
 
 def laploss(output_image, input_image, criterion):
