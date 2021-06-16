@@ -250,7 +250,7 @@ def show_image(img, image_flag):
     #     img = img.mul(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
     #     img = img.add(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
     npimg = img.detach().numpy()
-    npimg = npimg.dtype(d_type='float64')
+    npimg.dtype = 'float64'
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_0615.png")
