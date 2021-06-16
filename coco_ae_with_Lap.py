@@ -127,8 +127,8 @@ class CNN_AutoEncoder(nn.Module):
             nn.Tanh(),
         )
         self.fc = nn.Sequential(
-            nn.Linear(512, 256),
-            nn.Linear(256, 512),
+            nn.Linear(512, 512),
+            nn.Linear(512, 512),
         )
 
         # self.conv1 = nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5)  # out(16*64*64)
@@ -253,7 +253,7 @@ def training(train_loader, model, criterion, optimizer, device):
         # train_acc += (outputs.max(1)[1] == labels).sum().item()  #
     
     # try_show_image(make_edge(outputs, 64))
-    try_show_image(outputs)
+    # try_show_image(outputs)
 
     ave_train_loss = train_loss / len(train_loader.dataset)
     # ave_train_acc = train_acc / len(train_loader.dataset)
