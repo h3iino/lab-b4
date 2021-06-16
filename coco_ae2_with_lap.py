@@ -160,8 +160,8 @@ def laploss(output_image, input_image, criterion):
     output_edge = []
     loss = 0
     for i in range(1, 6):
-        input_edge.append(make_edge(input_image), 2**i)
-        output_edge.append(make_edge(output_image), 2**i)
+        input_edge.append(make_edge(input_image, 2**i))
+        output_edge.append(make_edge(output_image, 2**i))
         loss += criterion(input_edge[i-1], output_edge[i-1])
 
 
