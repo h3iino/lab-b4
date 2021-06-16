@@ -152,6 +152,7 @@ def make_edge(images, rate):
     edge = images - upsample_images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
     # edge = upsample_images - images  # 元画像とぼやけ画像の差分をとるとエッジを抽出できる
     # edge = torch.trunc(edge * 255)
+    edge = normalize_images(edge)
     return edge
 
 def laploss(output_image, input_image, criterion):
@@ -205,19 +206,19 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         train_loss += loss.item()
         # train_acc += (outputs.max(1)[1] == labels).sum().item()  #
     
-    # try_show_image(make_edge(images, 32))
+    # try_show_image(make_edge(images, 64))
     # try_show_image(make_edge(images, 16))
     # try_show_image(make_edge(images, 8))
     # try_show_image(make_edge(images, 4))
     # try_show_image(make_edge(images, 2))
-    try_show_image(make_edge(outputs, 64))
+    # try_show_image(make_edge(outputs, 64))
     # try_show_image(make_edge(outputs, 16))
     # try_show_image(make_edge(outputs, 8))
     # try_show_image(make_edge(outputs, 4))
     # try_show_image(make_edge(outputs, 2))
     # try_show_image(images)
     # try_show_image(images_e)
-    # try_show_image(outputs)
+    try_show_image(outputs)
     # try_show_image(outputs_e)
     # try_show_image(make_edge(outputs))
 
@@ -258,14 +259,15 @@ def drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss"):
     plt.show()
 
 # Min-Maxスケーリング
-def normalize_images(images):
+def normalize_images(diff):
     result = []
-    for diff in images:
-        diff_min = torch.min(diff)
-        diff_max = torch.max(diff)
-        diff_normalize = (diff - diff_min) / (diff_max - diff_min)
-        result.append(diff_normalize)
-    return result
+    # for diff in images:
+    diff_min = torch.min(diff)
+    diff_max = torch.max(diff)
+    diff_normalize = (diff - diff_min) / (diff_max - diff_min)
+        # result.append(diff_normalize)
+    # return result
+    return diff_normalize
 
 def show_image(img, image_flag):
     path = 'movies/'
