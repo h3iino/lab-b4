@@ -20,6 +20,7 @@ class Coco_Dataset(torch.utils.data.Dataset):
         # 指定する場合は前処理クラスを受け取る
         self.transform = transform[data_kind]
         self.resize64_transform = transforms.Compose([transforms.Resize(64),])
+        self.resize32_transform = transforms.Compose([transforms.Resize(32),])
         self.resize16_transform = transforms.Compose([transforms.Resize(16),])
         # label: 80種類
         self.category_list = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
@@ -78,10 +79,11 @@ class Coco_Dataset(torch.utils.data.Dataset):
         if self.transform is not None:
             image = self.transform(image)
             resize64_image = self.resize64_transform(image)
+            resize32_image = self.resize32_transform(image)
             resize16_image = self.resize16_transform(image)
         # 画像とラベルのペアを返却
         # return image, label
-        return image, resize64_image, resize16_image
+        return image, resize64_image, resize32_image, resize16_image
         
     def __len__(self):
         # ここにはデータ数を指定
@@ -121,6 +123,14 @@ class CNN_AutoEncoder(nn.Module):
             nn.Tanh(),
         )
         self.Decoder3 = nn.Sequential(
+            nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2),  # out(8*16*16)
+            nn.ReLU(inplace=True),
+            nn.ConvTranspose2d(8, 3, kernel_size=2, stride=2),  # out(3*32*32)
+            # nn.ReLU(inplace=True),
+            # nn.Sigmoid(),
+            nn.Tanh(),
+        )
+        self.Decoder4 = nn.Sequential(
             nn.ConvTranspose2d(8, 3, kernel_size=2, stride=2),  # out(3*16*16)
             # nn.ReLU(inplace=True),
             # nn.Sigmoid(),
@@ -128,7 +138,8 @@ class CNN_AutoEncoder(nn.Module):
         )
         self.fc = nn.Sequential(
             nn.Linear(512, 512),
-            nn.Linear(512, 512),
+            nn.Linear(512, 1024),
+            nn.Linear(1024, 512),
         )
 
         # self.conv1 = nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5)  # out(16*64*64)
@@ -156,6 +167,7 @@ class CNN_AutoEncoder(nn.Module):
         dec1_x = self.Decoder1(mid_x)
         dec2_x = self.Decoder2(mid_x)
         dec3_x = self.Decoder3(mid_x)
+        dec4_x = self.Decoder4(mid_x)
 
         # dec1_edge = make_edge(dec1_x)
         # dec2_edge = make_edge(dec2_x)
@@ -176,7 +188,7 @@ class CNN_AutoEncoder(nn.Module):
         # x = self.relu5(x)
 
         # return dec1_edge, dec2_edge, dec3_edge
-        return dec1_x, dec2_x, dec3_x
+        return dec1_x, dec2_x, dec3_x, dec4_x
 
 def normalize_edge(diff):
     result = []
@@ -201,11 +213,11 @@ def make_edge(images, rate):
     # edge = normalize_edge(edge)
     return edge
 
-def laploss(output_image, input_image, criterion):
+def laploss(output_image, input_image, criterion, stages):
     input_edge = []
     output_edge = []
     loss = 0
-    for i in range(1, 5):
+    for i in range(1, stage+1):
         input_edge.append(make_edge(input_image, 2**i))
         output_edge.append(make_edge(output_image, 2**i))
         loss += criterion(input_edge[i-1], output_edge[i-1])
@@ -230,21 +242,23 @@ def training(train_loader, model, criterion, optimizer, device):
     train_loss = 0
     # train_acc = 0
 
-    for i, (images, resize64_images, resize16_images) in enumerate(train_loader): 
+    for i, (images, resize64_images, resize32_image, resize16_images) in enumerate(train_loader): 
         images = images.to(device)
         resize64_images = resize64_images.to(device)
+        resize32_images = resize32_images.to(device)
         resize16_images = resize16_images.to(device)
         
         model.zero_grad()
-        outputs, r64_outputs, r16_outputs = model(images)
+        outputs, r64_outputs, r32_outputs, r16_outputs = model(images)
         
         # loss = criterion(outputs, images)
         # loss_r64 = criterion(r64_outputs, resize64_images)
         # loss_r16 = criterion(r16_outputs, resize16_images)
-        loss = laploss(outputs, images, criterion)
-        loss_r64 = laploss(r64_outputs, resize64_images, criterion)
-        loss_r16 = laploss(r16_outputs, resize16_images, criterion)
-        loss = loss + loss_r64 + loss_r16
+        loss = laploss(outputs, images, criterion, stages=6)
+        loss_r64 = laploss(r64_outputs, resize64_images, criterion, stages=5)
+        loss_r32 = laploss(r32_outputs, resize32_images, criterion, stages=4)
+        loss_r16 = laploss(r16_outputs, resize16_images, criterion, stages=3)
+        loss = loss + loss_r64 + loss_r32 + loss_r16
 
         loss.backward()
         optimizer.step()
@@ -264,20 +278,22 @@ def testing(test_loader, model, criterion, optimizer, device):
     # val_acc = 0
     outputs_and_inputs = []
     
-    for images, resize64_images, resize16_images in test_loader:
+    for images, resize64_images, resize32_images, resize16_images in test_loader:
         images = images.to(device)
         resize64_images = resize64_images.to(device)
+        resize32_images = resize32_images.to(device)
         resize16_images = resize16_images.to(device)
 
-        outputs, r64_outputs, r16_outputs = model(images)
+        outputs, r64_outputs, r32_outputs, r16_outputs = model(images)
 
         # loss = criterion(outputs, images)
         # loss_r64 = criterion(r64_outputs, resize64_images)
         # loss_r16 = criterion(r16_outputs, resize16_images)
-        loss = laploss(outputs, images, criterion)
-        loss_r64 = laploss(r64_outputs, resize64_images, criterion)
-        loss_r16 = laploss(r16_outputs, resize16_images, criterion)
-        loss = loss + loss_r64 + loss_r16
+        loss = laploss(outputs, images, criterion, stages=6)
+        loss_r64 = laploss(r64_outputs, resize64_images, criterion, stages=5)
+        loss_r32 = laploss(r32_outputs, resize32_images, criterion, stages=4)
+        loss_r16 = laploss(r16_outputs, resize16_images, criterion, stages=3)
+        loss = loss + loss_r64 + loss_r32 + loss_r16
 
         val_loss += loss.item()
         # val_acc += (outputs.max(1)[1] == labels).sum().item()  #
