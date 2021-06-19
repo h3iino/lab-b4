@@ -147,8 +147,8 @@ class CNN_AutoEncoder(nn.Module):
             nn.Tanh(),
         )
         self.fc = nn.Sequential(
-            nn.Linear(512, 256),
-            nn.Linear(256, 512),
+            nn.Linear(512, 512),
+            nn.Linear(512, 512),
         )
 
         # self.conv1 = nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5)  # out(16*64*64)
@@ -274,7 +274,7 @@ def show_image(img, image_flag):
     plt.show()
 
 def main():
-    num_epoch = 20
+    num_epoch = 200
     num_batch = 32
     data_train_num = 2000
     data_val_num = 500
