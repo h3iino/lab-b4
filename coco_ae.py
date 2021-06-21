@@ -249,7 +249,7 @@ def show_image(img, image_flag):
 def main():
     num_epoch = 100
     num_batch = 32
-    data_train_num = 2000
+    data_train_num = 5000
     data_val_num = 500
     data_test_num = 500
     train_loss_list = []
