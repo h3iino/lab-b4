@@ -267,7 +267,7 @@ def drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss"):
     plt.ylabel('loss')
     plt.title('Training and validation ' + draw_flag)
     plt.grid()
-    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_lap_0615.png")
+    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_lap_0623.png")
     plt.show()
 
 def show_image(img, image_flag):
@@ -281,8 +281,8 @@ def show_image(img, image_flag):
     npimg = img.detach().numpy()
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    # figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_lap_sample_0623.png")
-    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0623.png")
+    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_lap_sample_0623.png")
+    # figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0623.png")
     plt.show()
 
 def main():
@@ -362,10 +362,10 @@ def main():
         # save parameters of the model
         if is_save == True:
             if (epoch+1) % 100 == 0:
-                # model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
-                # optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
-                model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
-                optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
+                model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
+                optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
+                # model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
+                # optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
                 torch.save(model.state_dict(), model_path)
                 torch.save(optimizer.state_dict(), optim_path)
     
@@ -373,10 +373,10 @@ def main():
 
     # save parameters of the model
     if is_save == True:
-        # model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
-        # optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
-        model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
-        optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
+        model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
+        optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
+        # model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
+        # optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
         torch.save(model.state_dict(), model_path)
         torch.save(optimizer.state_dict(), optim_path)
 
@@ -384,8 +384,8 @@ def main():
     model2 = CNN_AutoEncoder().to(device)
     optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.001)   #adam  lr=0.0001
     # read parameters of the model
-    # model_path = 'model_ae_lap_200_s.pth'
-    model_path = 'model_ae_200_s.pth'
+    model_path = 'model_ae_lap_200_s.pth'
+    # model_path = 'model_ae_200_s.pth'
     model2.load_state_dict(torch.load(model_path))
 
     # test
