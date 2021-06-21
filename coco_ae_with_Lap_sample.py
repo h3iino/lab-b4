@@ -267,8 +267,8 @@ def drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss"):
     plt.ylabel('loss')
     plt.title('Training and validation ' + draw_flag)
     plt.grid()
-    # loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_lap_0623.png")
-    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0623.png")
+    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_lap_0623.png")
+    # loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0623.png")
     plt.show()
 
 def show_image(img, image_flag):
@@ -282,8 +282,8 @@ def show_image(img, image_flag):
     npimg = img.detach().numpy()
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    # figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_lap_sample_0623.png")
-    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0623.png")
+    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_lap_sample_0623.png")
+    # figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0623.png")
     plt.show()
 
 def main():
@@ -343,50 +343,51 @@ def main():
     criterion = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)   #adam  lr=0.0001
 
-    print('Start training...')
+    # print('Start training...')
 
-    for epoch in range(num_epoch):
-        # train
-        model.train()
-        ave_train_loss = training(train_loader, model, criterion, optimizer, device)
+    # for epoch in range(num_epoch):
+    #     # train
+    #     model.train()
+    #     ave_train_loss = training(train_loader, model, criterion, optimizer, device)
 
-        # eval
-        model.eval()
-        ave_val_loss, _ = testing(val_loader, model, criterion, optimizer, device)
-        print(f"Epoch [{epoch+1}/{num_epoch}], Loss: {ave_train_loss:.5f},",
-            f"val_loss: {ave_val_loss:.5f}")
+    #     # eval
+    #     model.eval()
+    #     ave_val_loss, _ = testing(val_loader, model, criterion, optimizer, device)
+    #     print(f"Epoch [{epoch+1}/{num_epoch}], Loss: {ave_train_loss:.5f},",
+    #         f"val_loss: {ave_val_loss:.5f}")
 
-        # record losses
-        train_loss_list.append(ave_train_loss)
-        val_loss_list.append(ave_val_loss)
+    #     # record losses
+    #     train_loss_list.append(ave_train_loss)
+    #     val_loss_list.append(ave_val_loss)
 
-        # save parameters of the model
-        if is_save == True:
-            if (epoch+1) % 100 == 0:
-                # model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
-                # optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
-                model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
-                optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
-                torch.save(model.state_dict(), model_path)
-                torch.save(optimizer.state_dict(), optim_path)
+    #     # save parameters of the model
+    #     if is_save == True:
+    #         if (epoch+1) % 100 == 0:
+    #             model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
+    #             optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
+    #             # model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
+    #             # optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
+    #             torch.save(model.state_dict(), model_path)
+    #             torch.save(optimizer.state_dict(), optim_path)
     
-    drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss")
+    # drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss")
 
-    # save parameters of the model
-    if is_save == True:
-        # model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
-        # optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
-        model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
-        optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
-        torch.save(model.state_dict(), model_path)
-        torch.save(optimizer.state_dict(), optim_path)
+    # # save parameters of the model
+    # if is_save == True:
+    #     model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
+    #     optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
+    #     # model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
+    #     # optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
+    #     torch.save(model.state_dict(), model_path)
+    #     torch.save(optimizer.state_dict(), optim_path)
 
     # initialize parameters
     model2 = CNN_AutoEncoder().to(device)
     optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.001)   #adam  lr=0.0001
     # read parameters of the model
     # model_path = 'model_ae_lap_200_s.pth'
-    model_path = 'model_ae_200_s.pth'
+    model_path = 'model_ae_lap_100.pth'
+    # model_path = 'model_ae_200_s.pth'
     model2.load_state_dict(torch.load(model_path))
 
     # test
