@@ -292,7 +292,7 @@ def show_image(img, image_flag):
     plt.show()
 
 def main():
-    num_epoch = 200
+    num_epoch = 100
     num_batch = 1
     data_train_num = 2000
     data_val_num = 500
@@ -348,43 +348,43 @@ def main():
     criterion = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)   #adam  lr=0.0001
 
-    # print('Start training...')
+    print('Start training...')
 
-    # for epoch in range(num_epoch):
-    #     # train
-    #     model.train()
-    #     ave_train_loss = training(train_loader, model, criterion, optimizer, device)
+    for epoch in range(num_epoch):
+        # train
+        model.train()
+        ave_train_loss = training(train_loader, model, criterion, optimizer, device)
 
-    #     # eval
-    #     model.eval()
-    #     ave_val_loss, _ = testing(val_loader, model, criterion, optimizer, device)
-    #     print(f"Epoch [{epoch+1}/{num_epoch}], Loss: {ave_train_loss:.5f},",
-    #         f"val_loss: {ave_val_loss:.5f}")
+        # eval
+        model.eval()
+        ave_val_loss, _ = testing(val_loader, model, criterion, optimizer, device)
+        print(f"Epoch [{epoch+1}/{num_epoch}], Loss: {ave_train_loss:.5f},",
+            f"val_loss: {ave_val_loss:.5f}")
 
-    #     # record losses
-    #     train_loss_list.append(ave_train_loss)
-    #     val_loss_list.append(ave_val_loss)
+        # record losses
+        train_loss_list.append(ave_train_loss)
+        val_loss_list.append(ave_val_loss)
 
-    #     # save parameters of the model
-    #     if is_save == True:
-    #         if (epoch+1) % 100 == 0:
-    #             model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
-    #             optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
-    #             # model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
-    #             # optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
-    #             torch.save(model.state_dict(), model_path)
-    #             torch.save(optimizer.state_dict(), optim_path)
+        # save parameters of the model
+        if is_save == True:
+            if (epoch+1) % 100 == 0:
+                model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
+                optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
+                # model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
+                # optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
+                torch.save(model.state_dict(), model_path)
+                torch.save(optimizer.state_dict(), optim_path)
     
-    # drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss")
+    drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss")
 
-    # # save parameters of the model
-    # if is_save == True:
-    #     model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
-    #     optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
-    #     # model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
-    #     # optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
-    #     torch.save(model.state_dict(), model_path)
-    #     torch.save(optimizer.state_dict(), optim_path)
+    # save parameters of the model
+    if is_save == True:
+        model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
+        optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
+        # model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
+        # optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
+        torch.save(model.state_dict(), model_path)
+        torch.save(optimizer.state_dict(), optim_path)
 
     # initialize parameters
     model2 = CNN_AutoEncoder().to(device)
