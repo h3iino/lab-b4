@@ -281,8 +281,8 @@ def show_image(img, image_flag):
     npimg = img.detach().numpy()
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_lap_sample_0623.png")
-    # figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0623.png")
+    # figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_lap_sample_0623.png")
+    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0623.png")
     plt.show()
 
 def main():
@@ -380,8 +380,8 @@ def main():
     model2 = CNN_AutoEncoder().to(device)
     optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.001)   #adam  lr=0.0001
     # read parameters of the model
-    model_path = 'model_ae_lap_200.pth'
-    # model_path = 'model_ae_200.pth'
+    # model_path = 'model_ae_lap_200.pth'
+    model_path = 'model_ae_200.pth'
     model2.load_state_dict(torch.load(model_path))
 
     # test
