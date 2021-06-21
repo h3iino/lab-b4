@@ -290,7 +290,7 @@ def main():
                                                 shuffle=True, num_workers=2)
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=num_batch, 
                                                 shuffle=False, num_workers=2)
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=num_batch, 
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, 
                                                 shuffle=False, num_workers=2)
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
