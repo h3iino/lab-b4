@@ -385,8 +385,8 @@ def main():
     model2 = CNN_AutoEncoder().to(device)
     optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.001)   #adam  lr=0.0001
     # read parameters of the model
-    # model_path = 'model_ae_lap_200_s.pth'
-    model_path = 'model_ae_lap_100.pth'
+    model_path = 'model_ae_lap_200_s.pth'
+    # model_path = 'model_ae_lap_100.pth'
     # model_path = 'model_ae_200_s.pth'
     model2.load_state_dict(torch.load(model_path))
 
