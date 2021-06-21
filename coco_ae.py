@@ -89,39 +89,6 @@ class Coco_Dataset(torch.utils.data.Dataset):
         return len(self.images)
 
 
-class Linear_AutoEncoder(nn.Module):
-
-    def __init__(self):
-        super(Linear_AutoEncoder, self).__init__()
-        self.Encoder = nn.Sequential(  # in(3*256*256)
-            # nn.Linear(196608, 32768),  # out(128*256)
-            nn.Linear(196608, 512),
-            nn.ReLU(inplace=True),
-            # nn.Linear(32768, 4096),  # out(64*64)
-            # nn.ReLU(inplace=True),
-            # nn.Linear(1024, 512),
-            # nn.Linear(4096, 512),  # out(512)
-            # nn.ReLU(inplace=True),
-        )
-        self.Decoder = nn.Sequential(
-            # nn.Linear(512, 4096),
-            # nn.Linear(512, 1024),
-            # nn.ReLU(inplace=True),
-            # nn.Linear(4096, 32768),
-            # nn.ReLU(inplace=True),
-            nn.Linear(512, 196608),
-            # nn.Linear(32768, 196608),  # out(3"256"256)
-            nn.ReLU(inplace=True),
-            # nn.Tanh(),
-        )
-
-    def forward(self, x):
-        # x = x.view(x.size(0), -1)  # flatten
-        x = self.Encoder(x)
-        x = self.Decoder(x)
-
-        return x
-
 
 class CNN_AutoEncoder(nn.Module):
 
@@ -135,20 +102,21 @@ class CNN_AutoEncoder(nn.Module):
             nn.Conv2d(16, 8, kernel_size=5, stride=2, padding=2),  # out(8*16*16)
             nn.ReLU(inplace=True),
             # nn.MaxPool2d(kernel_size=2, stride=2),  # out(8*8*8)
-            nn.Conv2d(8, 8, kernel_size=5, stride=2, padding=2),  # out(8*8*8)
+            nn.Conv2d(16, 8, kernel_size=5, stride=2, padding=2),  # out(16*8*8)
         )
         self.Decoder = nn.Sequential(
-            nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2),  # out(8*16*16)
+            nn.ConvTranspose2d(16, 16, kernel_size=2, stride=2),  # out(16*16*16)
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(8, 16, kernel_size=4, stride=4),  # out(16*64*64)
+            nn.ConvTranspose2d(16, 16, kernel_size=4, stride=4),  # out(16*64*64)
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(16, 3, kernel_size=4, stride=4),  # out(3*256*256)
             # nn.ReLU(inplace=True),
             nn.Tanh(),
         )
         self.fc = nn.Sequential(
+            nn.Linear(1024, 512),
             nn.Linear(512, 512),
-            nn.Linear(512, 512),
+            nn.Linear(512, 1024),
         )
 
         # self.conv1 = nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5)  # out(16*64*64)
@@ -168,9 +136,9 @@ class CNN_AutoEncoder(nn.Module):
     def forward(self, x):
         x = self.Encoder(x)
 
-        x = x.reshape(-1, 512)
+        x = x.reshape(-1, 1024)
         x = self.fc(x)
-        x = x.reshape(-1, 8, 8, 8)
+        x = x.reshape(-1, 16, 8, 8)
 
         x = self.Decoder(x)
 
@@ -244,7 +212,8 @@ def drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss"):
     plt.ylabel('loss')
     plt.title('Training and validation ' + draw_flag)
     plt.grid()
-    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0615.png")
+    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0623.png")
+    # loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0615.png")
     plt.show()
 
 # Min-Maxスケーリング
@@ -270,11 +239,12 @@ def show_image(img, image_flag):
     npimg = img.detach().numpy()
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_0615.png")
+    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0623.png")
+    # figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_0615.png")
     plt.show()
 
 def main():
-    num_epoch = 200
+    num_epoch = 100
     num_batch = 32
     data_train_num = 2000
     data_val_num = 500
@@ -326,8 +296,7 @@ def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     if model_flag == "cnn":
         model = CNN_AutoEncoder().to(device)
-    else:
-        model = Linear_AutoEncoder().to(device)
+
     print(device)  # GPUを使えているか
     print(model)  # ネットワーク構造を記述
 
@@ -357,8 +326,10 @@ def main():
         # save parameters of the model
         if is_save == True:
             if (epoch+1) % 100 == 0:
-                model_path = 'model_ae_' + str(epoch+1) + '.pth'
-                optim_path = 'optim_ae_' + str(epoch+1) + '.pth'
+                # model_path = 'model_ae_' + str(epoch+1) + '.pth'
+                # optim_path = 'optim_ae_' + str(epoch+1) + '.pth'
+                model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
+                optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
                 torch.save(model.state_dict(), model_path)
                 torch.save(optimizer.state_dict(), optim_path)
     
@@ -367,8 +338,10 @@ def main():
 
     # save parameters of the model
     if is_save == True:
-        model_path = 'model_ae_' + str(epoch+1) + '.pth'
-        optim_path = 'optim_ae_' + str(epoch+1) + '.pth'
+        # model_path = 'model_ae_' + str(epoch+1) + '.pth'
+        # optim_path = 'optim_ae_' + str(epoch+1) + '.pth'
+        model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
+        optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
         # model_path = 'model_ae.pth'
         # optim_path = 'optim_ae.pth'
         torch.save(model.state_dict(), model_path)
@@ -377,12 +350,11 @@ def main():
     # initialize parameters
     if model_flag == "cnn":
         model2 = CNN_AutoEncoder().to(device)
-    else:
-        model2 = Linear_AutoEncoder().to(device)
     optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.001)   #adam  lr=0.0001
     # read parameters of the model
     # model_path = 'model_ae_50.pth'
-    model_path = 'model_ae_' + str(epoch+1) + '.pth'
+    # model_path = 'model_ae_' + str(epoch+1) + '.pth'
+    model_path = 'model_ae_100_s.pth'
     model2.load_state_dict(torch.load(model_path))
     # optimizer2.load_state_dict(torch.load(optim_path))
 
