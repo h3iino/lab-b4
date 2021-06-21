@@ -212,11 +212,11 @@ def training(train_loader, model, criterion, optimizer, device):
         outputs, r64_outputs, r32_outputs, r16_outputs = model(images)
         
         loss = criterion(outputs, images)
-        loss_lap256 = laploss(outputs, images, criterion, stages=8)
-        loss_lap64 = laploss(r64_outputs, resize64_images, criterion, stages=6)
-        loss_lap32 = laploss(r32_outputs, resize32_images, criterion, stages=5)
-        loss_lap16 = laploss(r16_outputs, resize16_images, criterion, stages=4)
-        loss = loss + loss_lap256 + loss_lap64 + loss_lap32 + loss_lap16
+        # loss_lap256 = laploss(outputs, images, criterion, stages=8)
+        # loss_lap64 = laploss(r64_outputs, resize64_images, criterion, stages=6)
+        # loss_lap32 = laploss(r32_outputs, resize32_images, criterion, stages=5)
+        # loss_lap16 = laploss(r16_outputs, resize16_images, criterion, stages=4)
+        # loss = loss + loss_lap256 + loss_lap64 + loss_lap32 + loss_lap16
 
         loss.backward()
         optimizer.step()
@@ -245,11 +245,11 @@ def testing(test_loader, model, criterion, optimizer, device):
         outputs, r64_outputs, r32_outputs, r16_outputs = model(images)
 
         loss = criterion(outputs, images)
-        loss_lap256 = laploss(outputs, images, criterion, stages=8)
-        loss_lap64 = laploss(r64_outputs, resize64_images, criterion, stages=6)
-        loss_lap32 = laploss(r32_outputs, resize32_images, criterion, stages=5)
-        loss_lap16 = laploss(r16_outputs, resize16_images, criterion, stages=4)
-        loss = loss + loss_lap256 + loss_lap64 + loss_lap32 + loss_lap16
+        # loss_lap256 = laploss(outputs, images, criterion, stages=8)
+        # loss_lap64 = laploss(r64_outputs, resize64_images, criterion, stages=6)
+        # loss_lap32 = laploss(r32_outputs, resize32_images, criterion, stages=5)
+        # loss_lap16 = laploss(r16_outputs, resize16_images, criterion, stages=4)
+        # loss = loss + loss_lap256 + loss_lap64 + loss_lap32 + loss_lap16
 
         val_loss += loss.item()
         outputs_and_inputs.append((outputs, images))
@@ -267,7 +267,8 @@ def drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss"):
     plt.ylabel('loss')
     plt.title('Training and validation ' + draw_flag)
     plt.grid()
-    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_lap_0623.png")
+    # loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_lap_0623.png")
+    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0623.png")
     plt.show()
 
 def show_image(img, image_flag):
@@ -281,8 +282,8 @@ def show_image(img, image_flag):
     npimg = img.detach().numpy()
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_lap_sample_0623.png")
-    # figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0623.png")
+    # figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_lap_sample_0623.png")
+    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0623.png")
     plt.show()
 
 def main():
@@ -328,7 +329,7 @@ def main():
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=num_batch, 
                                                 shuffle=True, num_workers=2)
-    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=1, 
+    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=num_batch, 
                                                 shuffle=False, num_workers=2)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, 
                                                 shuffle=False, num_workers=2)
@@ -362,10 +363,10 @@ def main():
         # save parameters of the model
         if is_save == True:
             if (epoch+1) % 100 == 0:
-                model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
-                optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
-                # model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
-                # optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
+                # model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
+                # optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
+                model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
+                optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
                 torch.save(model.state_dict(), model_path)
                 torch.save(optimizer.state_dict(), optim_path)
     
@@ -373,10 +374,10 @@ def main():
 
     # save parameters of the model
     if is_save == True:
-        model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
-        optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
-        # model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
-        # optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
+        # model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
+        # optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
+        model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
+        optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
         torch.save(model.state_dict(), model_path)
         torch.save(optimizer.state_dict(), optim_path)
 
@@ -384,8 +385,8 @@ def main():
     model2 = CNN_AutoEncoder().to(device)
     optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.001)   #adam  lr=0.0001
     # read parameters of the model
-    model_path = 'model_ae_lap_200_s.pth'
-    # model_path = 'model_ae_200_s.pth'
+    # model_path = 'model_ae_lap_200_s.pth'
+    model_path = 'model_ae_200_s.pth'
     model2.load_state_dict(torch.load(model_path))
 
     # test
