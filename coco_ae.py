@@ -18,6 +18,7 @@ torch.cuda.empty_cache()
 # # print(coco.getCatIds(supNms=["vehicle"]))
 # img_ids = coco.getImgIds(catIds=cat_ids)  # 指定したカテゴリ ID の物体がすべて存在する画像の ID 一覧を取得する。
 
+
 # COCOデータセット
 class Coco_Dataset(torch.utils.data.Dataset):  
   
