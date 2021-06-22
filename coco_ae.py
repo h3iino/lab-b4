@@ -107,9 +107,13 @@ class CNN_AutoEncoder(nn.Module):
         self.Decoder = nn.Sequential(
             nn.ConvTranspose2d(8, 16, kernel_size=2, stride=2),  # out(16*16*16)
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(16, 16, kernel_size=4, stride=4),  # out(16*64*64)
+            nn.ConvTranspose2d(16, 16, kernel_size=2, stride=2),  # out(16*32*32)
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(16, 3, kernel_size=4, stride=4),  # out(3*256*256)
+            nn.ConvTranspose2d(16, 16, kernel_size=2, stride=2),  # out(16*64*64)
+            nn.ReLU(inplace=True),
+            nn.ConvTranspose2d(16, 16, kernel_size=2, stride=2),  # out(16*128*128)
+            nn.ReLU(inplace=True),
+            nn.ConvTranspose2d(16, 3, kernel_size=2, stride=2),  # out(3*256*256)
             # nn.ReLU(inplace=True),
             nn.Tanh(),
         )
@@ -248,7 +252,7 @@ def show_image(img, image_flag):
 
 def main():
     num_epoch = 100
-    num_batch = 128
+    num_batch = 256
     data_train_num = 2000
     data_val_num = 500
     data_test_num = 500
