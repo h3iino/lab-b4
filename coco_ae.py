@@ -101,11 +101,11 @@ class CNN_AutoEncoder(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv2d(16, 16, kernel_size=5, stride=2, padding=2),  # out(16*16*16)
             nn.ReLU(inplace=True),
-            nn.Conv2d(16, 16, kernel_size=5, stride=2, padding=2),  # out(16*8*8)
+            nn.Conv2d(16, 8, kernel_size=5, stride=2, padding=2),  # out(16*8*8)
             nn.ReLU(inplace=True),
         )
         self.Decoder = nn.Sequential(
-            nn.ConvTranspose2d(16, 16, kernel_size=2, stride=2),  # out(16*16*16)
+            nn.ConvTranspose2d(8, 16, kernel_size=2, stride=2),  # out(16*16*16)
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(16, 16, kernel_size=4, stride=4),  # out(16*64*64)
             nn.ReLU(inplace=True),
@@ -114,11 +114,11 @@ class CNN_AutoEncoder(nn.Module):
             nn.Tanh(),
         )
         self.fc = nn.Sequential(
-            nn.Linear(1024, 512),
+            nn.Linear(512, 512),
             nn.ReLU(inplace=True),
             nn.Linear(512, 512),
             nn.ReLU(inplace=True),
-            nn.Linear(512, 1024),
+            nn.Linear(512, 512),
             nn.ReLU(inplace=True),
         )
 
@@ -139,9 +139,9 @@ class CNN_AutoEncoder(nn.Module):
     def forward(self, x):
         x = self.Encoder(x)
 
-        x = x.reshape(-1, 1024)
+        x = x.reshape(-1, 512)
         x = self.fc(x)
-        x = x.reshape(-1, 16, 8, 8)
+        x = x.reshape(-1, 8, 8, 8)
 
         x = self.Decoder(x)
 
