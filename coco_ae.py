@@ -175,8 +175,6 @@ def training(train_loader, model, criterion, optimizer, device, model_flag):
         images = images.to(device)
         
         model.zero_grad()
-        if model_flag == "linear":
-            images = images.reshape(-1, 3*256*256)
         outputs = model(images)
         
         loss = criterion(outputs, images)
@@ -198,8 +196,6 @@ def testing(test_loader, model, criterion, optimizer, device, model_flag):
     for images in test_loader:
         images = images.to(device)
 
-        if model_flag == "linear":
-            images = images.reshape(-1, 3*256*256)
         outputs = model(images)
         loss = criterion(outputs, images)
         val_loss += loss.item()
@@ -252,8 +248,8 @@ def show_image(img, image_flag):
     plt.show()
 
 def main():
-    num_epoch = 200
-    num_batch = 128
+    num_epoch = 100
+    num_batch = 256
     data_train_num = 2000
     data_val_num = 500
     data_test_num = 500
