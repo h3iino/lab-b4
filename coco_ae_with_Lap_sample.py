@@ -393,7 +393,7 @@ def main():
     model2 = CNN_AutoEncoder().to(device)
     optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.001)   #adam  lr=0.0001
     # read parameters of the model
-    model_path = 'model_ae_lap_100_s.pth'
+    model_path = 'model_ae_lap_200_s.pth'
     # model_path = 'model_ae_lap_100.pth'
     # model_path = 'model_ae_200_s.pth'
     model2.load_state_dict(torch.load(model_path))
@@ -401,7 +401,7 @@ def main():
     # test
     model2.eval()
     print('Test begin...')
-    ave_test_loss, outputs_and_inputs = testing(test_loader, model, criterion, optimizer, device)
+    ave_test_loss, outputs_and_inputs = testing(test_loader, model2, criterion, optimizer2, device)
     print(f"Test Loss: {ave_test_loss:.5f}")
     # 入力画像と出力画像を表示
     output_image, input_image = outputs_and_inputs[-1]
