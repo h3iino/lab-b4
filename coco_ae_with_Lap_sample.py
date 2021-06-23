@@ -380,14 +380,14 @@ def main():
     
     # drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss")
 
-    # save parameters of the model
-    if is_save == True:
-        model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
-        optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
-        # model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
-        # optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
-        torch.save(model.state_dict(), model_path)
-        torch.save(optimizer.state_dict(), optim_path)
+    # # save parameters of the model
+    # if is_save == True:
+    #     model_path = 'model_ae_lap_' + str(epoch+1) + '_s.pth'
+    #     optim_path = 'optim_ae_lap_' + str(epoch+1) + '_s.pth'
+    #     # model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
+    #     # optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
+    #     torch.save(model.state_dict(), model_path)
+    #     torch.save(optimizer.state_dict(), optim_path)
 
     # initialize parameters
     model2 = CNN_AutoEncoder().to(device)
