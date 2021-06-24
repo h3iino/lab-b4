@@ -274,7 +274,7 @@ def main():
     data_transforms = {
         'train': transforms.Compose([
             # transforms.RandomResizedCrop(256),  # ランダムにトリミングして (256, 256)の形状にしてる
-            transforms.Resize(256),  # 画像のサイズを(256, 256)にする
+            transforms.Resize(256, 256),  # 画像のサイズを(256, 256)にする
             # transforms.RandomHorizontalFlip(),  # 50%の確率で水平方向に反転させる
             # transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5),  # ランダムに明るさ、コントラスト、彩度、色相を変化させる
             transforms.ToTensor(),  # Tensorに変換
