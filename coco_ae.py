@@ -97,11 +97,13 @@ class CNN_AutoEncoder(nn.Module):
         super(CNN_AutoEncoder, self).__init__()
         self.Encoder = nn.Sequential(  # in(3*256*256)
             nn.Conv2d(3, 32, kernel_size=11, stride=4, padding=5),  # out(64*64*64)
-            # nn.BatchNorm2d(32),
+            nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
             nn.Conv2d(32, 32, kernel_size=5, stride=2, padding=2),  # out(32*32*32)
+            nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
             nn.Conv2d(32, 16, kernel_size=5, stride=2, padding=2),  # out(16*16*16)
+            nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
             nn.Conv2d(16, 8, kernel_size=5, stride=2, padding=2),  # out(16*8*8)
             nn.BatchNorm2d(8),
@@ -109,13 +111,16 @@ class CNN_AutoEncoder(nn.Module):
         )
         self.Decoder = nn.Sequential(
             nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2),  # out(16*16*16)
+            nn.BatchNorm2d(8),
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(8, 16, kernel_size=2, stride=2),  # out(16*32*32)
-            # nn.BatchNorm2d(16),
+            nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(16, 32, kernel_size=2, stride=2),  # out(16*64*64)
+            nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(32, 32, kernel_size=2, stride=2),  # out(16*128*128)
+            nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(32, 3, kernel_size=2, stride=2),  # out(3*256*256)
             nn.BatchNorm2d(3),
@@ -253,7 +258,7 @@ def show_image(img, image_flag):
 
 def main():
     num_epoch = 100
-    num_batch = 256
+    num_batch = 128
     data_train_num = 2000
     data_val_num = 500
     data_test_num = 500
@@ -268,22 +273,23 @@ def main():
     #画像の前処理を定義
     data_transforms = {
         'train': transforms.Compose([
-            transforms.RandomResizedCrop(256),  # ランダムにトリミングして (256, 256)の形状にしてる
-            transforms.RandomHorizontalFlip(),  # 50%の確率で水平方向に反転させる
+            # transforms.RandomResizedCrop(256),  # ランダムにトリミングして (256, 256)の形状にしてる
+            transforms.Resize(256),  # 画像のサイズを(256, 256)にする
+            # transforms.RandomHorizontalFlip(),  # 50%の確率で水平方向に反転させる
             # transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5),  # ランダムに明るさ、コントラスト、彩度、色相を変化させる
             transforms.ToTensor(),  # Tensorに変換
             # transforms.RandomErasing(),  # ランダムにカットアウトさせる
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 平均値と標準偏差を指定して、結果のTensorを正規化
         ]),
         'val': transforms.Compose([
-            transforms.Resize(289),  # 画像のサイズを(289, 289)にする
-            transforms.CenterCrop(256),  # (256, 256)にするために、サイズ変更された画像を中央で切り取る
+            transforms.Resize(256),  # 画像のサイズを(289, 289)にする
+            # transforms.CenterCrop(256),  # (256, 256)にするために、サイズ変更された画像を中央で切り取る
             transforms.ToTensor(),  # Tensorに変換
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 平均値と標準偏差を指定して、結果のTensorを正規化
         ]),
         'test': transforms.Compose([
-            transforms.Resize(289),  # 画像のサイズを(289, 289)にする
-            transforms.CenterCrop(256),  # (256, 256)にするために、サイズ変更された画像を中央で切り取る
+            transforms.Resize(256),  # 画像のサイズを(289, 289)にする
+            # transforms.CenterCrop(256),  # (256, 256)にするために、サイズ変更された画像を中央で切り取る
             transforms.ToTensor(),  # Tensorに変換
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 平均値と標準偏差を指定して、結果のTensorを正規化
         ]),
