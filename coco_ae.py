@@ -96,9 +96,9 @@ class CNN_AutoEncoder(nn.Module):
     def __init__(self):
         super(CNN_AutoEncoder, self).__init__()
         self.Encoder = nn.Sequential(  # in(3*256*256)
-            nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=5),  # out(64*64*64)
+            nn.Conv2d(3, 32, kernel_size=11, stride=4, padding=5),  # out(64*64*64)
             nn.ReLU(inplace=True),
-            nn.Conv2d(64, 32, kernel_size=5, stride=2, padding=2),  # out(32*32*32)
+            nn.Conv2d(32, 32, kernel_size=5, stride=2, padding=2),  # out(32*32*32)
             nn.ReLU(inplace=True),
             nn.Conv2d(32, 16, kernel_size=5, stride=2, padding=2),  # out(16*16*16)
             nn.ReLU(inplace=True),
@@ -112,9 +112,9 @@ class CNN_AutoEncoder(nn.Module):
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(16, 32, kernel_size=2, stride=2),  # out(16*64*64)
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(32, 64, kernel_size=2, stride=2),  # out(16*128*128)
+            nn.ConvTranspose2d(32, 32, kernel_size=2, stride=2),  # out(16*128*128)
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(64, 3, kernel_size=2, stride=2),  # out(3*256*256)
+            nn.ConvTranspose2d(32, 3, kernel_size=2, stride=2),  # out(3*256*256)
             # nn.ReLU(inplace=True),
             nn.Tanh(),
         )
