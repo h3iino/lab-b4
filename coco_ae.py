@@ -274,7 +274,8 @@ def main():
     data_transforms = {
         'train': transforms.Compose([
             # transforms.RandomResizedCrop(256),  # ランダムにトリミングして (256, 256)の形状にしてる
-            transforms.Resize(256, 256),  # 画像のサイズを(256, 256)にする
+            # transforms.Resize(256),  # 画像のサイズを(256, 256)にする
+            transforms.CenterCrop(256),  # (256, 256)にするために、サイズ変更された画像を中央で切り取る
             # transforms.RandomHorizontalFlip(),  # 50%の確率で水平方向に反転させる
             # transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5),  # ランダムに明るさ、コントラスト、彩度、色相を変化させる
             transforms.ToTensor(),  # Tensorに変換
@@ -282,14 +283,14 @@ def main():
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 平均値と標準偏差を指定して、結果のTensorを正規化
         ]),
         'val': transforms.Compose([
-            transforms.Resize(256),  # 画像のサイズを(289, 289)にする
-            # transforms.CenterCrop(256),  # (256, 256)にするために、サイズ変更された画像を中央で切り取る
+            # transforms.Resize(256),  # 画像のサイズを(289, 289)にする
+            transforms.CenterCrop(256),  # (256, 256)にするために、サイズ変更された画像を中央で切り取る
             transforms.ToTensor(),  # Tensorに変換
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 平均値と標準偏差を指定して、結果のTensorを正規化
         ]),
         'test': transforms.Compose([
-            transforms.Resize(256),  # 画像のサイズを(289, 289)にする
-            # transforms.CenterCrop(256),  # (256, 256)にするために、サイズ変更された画像を中央で切り取る
+            # transforms.Resize(256),  # 画像のサイズを(289, 289)にする
+            transforms.CenterCrop(256),  # (256, 256)にするために、サイズ変更された画像を中央で切り取る
             transforms.ToTensor(),  # Tensorに変換
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 平均値と標準偏差を指定して、結果のTensorを正規化
         ]),
