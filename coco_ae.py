@@ -249,7 +249,7 @@ def show_image(img, image_flag):
 
 def main():
     num_epoch = 100
-    num_batch = 256
+    num_batch = 512
     data_train_num = 2000
     data_val_num = 500
     data_test_num = 500
@@ -365,7 +365,7 @@ def main():
     # test
     model2.eval()
     print('Test begin...')
-    ave_test_loss, outputs_and_inputs = testing(test_loader, model, criterion, optimizer, device, model_flag)
+    ave_test_loss, outputs_and_inputs = testing(test_loader, model2, criterion, optimizer2, device, model_flag)
     print(f"Test Loss: {ave_test_loss:.5f}")
     # 入力画像と出力画像を表示
     output_image, input_image = outputs_and_inputs[-1]
