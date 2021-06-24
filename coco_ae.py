@@ -96,8 +96,8 @@ class CNN_AutoEncoder(nn.Module):
     def __init__(self):
         super(CNN_AutoEncoder, self).__init__()
         self.Encoder = nn.Sequential(  # in(3*256*256)
-            nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5),  # out(64*64*64)
-            nn.BatchNorm2d(16),
+            nn.Conv2d(3, 32, kernel_size=11, stride=4, padding=5),  # out(64*64*64)
+            nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
             nn.Conv2d(16, 16, kernel_size=5, stride=2, padding=2),  # out(32*32*32)
             nn.BatchNorm2d(16),
@@ -119,10 +119,10 @@ class CNN_AutoEncoder(nn.Module):
             nn.ConvTranspose2d(16, 16, kernel_size=2, stride=2),  # out(16*64*64)
             nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(16, 16, kernel_size=2, stride=2),  # out(16*128*128)
-            nn.BatchNorm2d(16),
+            nn.ConvTranspose2d(16, 32, kernel_size=2, stride=2),  # out(16*128*128)
+            nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(16, 3, kernel_size=2, stride=2),  # out(3*256*256)
+            nn.ConvTranspose2d(32, 3, kernel_size=2, stride=2),  # out(3*256*256)
             nn.BatchNorm2d(3),
             # nn.ReLU(inplace=True),
             nn.Tanh(),
@@ -274,7 +274,7 @@ def main():
     data_transforms = {
         'train': transforms.Compose([
             # transforms.RandomResizedCrop(256),  # ランダムにトリミングして (256, 256)の形状にしてる
-            # transforms.Resize(256),  # 画像のサイズを(256, 256)にする
+            transforms.Resize(256),  # 画像のサイズを(256, 256)にする
             transforms.CenterCrop(256),  # (256, 256)にするために、サイズ変更された画像を中央で切り取る
             # transforms.RandomHorizontalFlip(),  # 50%の確率で水平方向に反転させる
             # transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5),  # ランダムに明るさ、コントラスト、彩度、色相を変化させる
@@ -283,13 +283,13 @@ def main():
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 平均値と標準偏差を指定して、結果のTensorを正規化
         ]),
         'val': transforms.Compose([
-            # transforms.Resize(256),  # 画像のサイズを(289, 289)にする
+            transforms.Resize(256),  # 画像のサイズを(289, 289)にする
             transforms.CenterCrop(256),  # (256, 256)にするために、サイズ変更された画像を中央で切り取る
             transforms.ToTensor(),  # Tensorに変換
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 平均値と標準偏差を指定して、結果のTensorを正規化
         ]),
         'test': transforms.Compose([
-            # transforms.Resize(256),  # 画像のサイズを(289, 289)にする
+            transforms.Resize(256),  # 画像のサイズを(289, 289)にする
             transforms.CenterCrop(256),  # (256, 256)にするために、サイズ変更された画像を中央で切り取る
             transforms.ToTensor(),  # Tensorに変換
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 平均値と標準偏差を指定して、結果のTensorを正規化
@@ -355,8 +355,8 @@ def main():
     if is_save == True:
         # model_path = 'model_ae_' + str(epoch+1) + '.pth'
         # optim_path = 'optim_ae_' + str(epoch+1) + '.pth'
-        model_path = 'model_ae_' + str(epoch+1) + '_s.pth'
-        optim_path = 'optim_ae_' + str(epoch+1) + '_s.pth'
+        model_path = 'model_ae'  + '_s.pth'
+        optim_path = 'optim_ae' + '_s.pth'
         # model_path = 'model_ae.pth'
         # optim_path = 'optim_ae.pth'
         torch.save(model.state_dict(), model_path)
@@ -368,7 +368,7 @@ def main():
     # read parameters of the model
     # model_path = 'model_ae_50.pth'
     # model_path = 'model_ae_' + str(epoch+1) + '.pth'
-    model_path = 'model_ae_100_s.pth'
+    model_path = 'model_ae_s.pth'
     model2.load_state_dict(torch.load(model_path))
     # optimizer2.load_state_dict(torch.load(optim_path))
 
