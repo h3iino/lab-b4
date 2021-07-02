@@ -129,7 +129,7 @@ class CNN_AutoEncoder(nn.Module):
         )
         self.fc = nn.Sequential(
             # nn.Linear(1024, 512),
-            nn.Linear(16, 8),
+            nn.Linear(8, 8),
             # nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
             # nn.Linear(512, 512),
@@ -137,7 +137,7 @@ class CNN_AutoEncoder(nn.Module):
             # nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
             # nn.Linear(512, 1024),
-            nn.Linear(8, 16),
+            nn.Linear(8, 8),
             # nn.BatchNorm1d(1024),
             nn.ReLU(inplace=True),
         )
