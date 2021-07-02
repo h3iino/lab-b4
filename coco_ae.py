@@ -267,7 +267,7 @@ def show_image(img, image_flag):
     plt.show()
 
 def main():
-    num_epoch = 100
+    num_epoch = 1000
     # num_batch = 128
     num_batch = 16
     data_train_num = 200
