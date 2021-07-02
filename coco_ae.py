@@ -183,8 +183,8 @@ class CNN_AutoEncoder(nn.Module):
         # print(x.shape)
         x = self.rl1(x)
         # x = self.rl1(self.bn1(self.fc1(x)))
-        x = self.rl2(self.fc2(x)))
-        x = self.rl3(self.fc3(x)))
+        x = self.rl2(self.fc2(x))
+        x = self.rl3(self.fc3(x))
         x = x.reshape(-1, 16, 8, 8)
 
         x = self.Decoder(x)
