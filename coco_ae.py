@@ -146,8 +146,8 @@ class CNN_AutoEncoder(nn.Module):
             nn.ReLU(inplace=True),
         )
 
-        self.fc1 = nn.Linear(1024, 1024)
-        self.bn1 = nn.BatchNorm2d(1024)
+        self.fc1 = nn.Linear(1024, 512)
+        self.bn1 = nn.BatchNorm1d(512)
         self.rl1 = nn.ReLU(inplace=True)
         self.fc2 = nn.Linear(1024, 1024)
         self.bn2 = nn.BatchNorm1d(1024)
