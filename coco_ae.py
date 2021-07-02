@@ -303,7 +303,8 @@ def main():
     root = '../coco/images'
     train_dataset = Coco_Dataset(data_train_num, root, data_transforms, data_kind='train')
     val_dataset = Coco_Dataset(data_val_num, root, data_transforms, data_kind='val')
-    test_dataset = Coco_Dataset(data_test_num, root, data_transforms, data_kind='test')
+    # test_dataset = Coco_Dataset(data_test_num, root, data_transforms, data_kind='test')
+    test_dataset = Coco_Dataset(data_test_num, root, data_transforms, data_kind='train')  # 画像を再構成できているか確認するため
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=num_batch, 
                                                 shuffle=True, num_workers=2)
