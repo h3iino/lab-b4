@@ -96,13 +96,13 @@ class CNN_AutoEncoder(nn.Module):
     def __init__(self):
         super(CNN_AutoEncoder, self).__init__()
         self.Encoder = nn.Sequential(  # in(3*256*256)
-            nn.Conv2d(3, 8, kernel_size=11, stride=4, padding=5),  # out(64*64*64)
+            nn.Conv2d(3, 8, kernel_size=11, stride=4, padding=5),  # out(8*64*64)
             nn.BatchNorm2d(8),
             nn.ReLU(inplace=True),
-            nn.Conv2d(8, 16, kernel_size=5, stride=2, padding=2),  # out(32*32*32)
+            nn.Conv2d(8, 16, kernel_size=5, stride=2, padding=2),  # out(16*32*32)
             nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
-            nn.Conv2d(16, 24, kernel_size=5, stride=2, padding=2),  # out(16*16*16)
+            nn.Conv2d(16, 24, kernel_size=5, stride=2, padding=2),  # out(24*16*16)
             nn.BatchNorm2d(24),
             nn.ReLU(inplace=True),
             nn.Conv2d(24, 16, kernel_size=5, stride=2, padding=2),  # out(16*8*8)
@@ -116,10 +116,10 @@ class CNN_AutoEncoder(nn.Module):
             nn.ConvTranspose2d(24, 16, kernel_size=2, stride=2),  # out(16*32*32)
             nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(16, 12, kernel_size=2, stride=2),  # out(16*64*64)
-            nn.BatchNorm2d(12),
-            nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(12, 8, kernel_size=2, stride=2),  # out(16*128*128)
+            # nn.ConvTranspose2d(16, 12, kernel_size=2, stride=2),  # out(16*64*64)
+            # nn.BatchNorm2d(12),
+            # nn.ReLU(inplace=True),
+            nn.ConvTranspose2d(16, 8, kernel_size=4, stride=4),  # out(16*128*128)
             nn.BatchNorm2d(8),
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(8, 3, kernel_size=2, stride=2),  # out(3*256*256)
@@ -313,15 +313,15 @@ def main():
     test_dataset = Coco_Dataset(data_test_num, root, data_transforms, data_kind='train')  # 画像を再構成できているか確認するため
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=num_batch, 
-                                                shuffle=True, num_workers=2)
+                                                shuffle=False, num_workers=2)  # 画像を再構成できているか確認するため
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=num_batch, 
                                                 shuffle=False, num_workers=2)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, 
                                                 shuffle=False, num_workers=2)
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    if model_flag == "cnn":
-        model = CNN_AutoEncoder().to(device)
+    # if model_flag == "cnn":
+    model = CNN_AutoEncoder().to(device)
 
     print(device)  # GPUを使えているか
     print(model)  # ネットワーク構造を記述
