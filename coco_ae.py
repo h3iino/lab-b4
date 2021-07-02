@@ -97,50 +97,50 @@ class CNN_AutoEncoder(nn.Module):
         super(CNN_AutoEncoder, self).__init__()
         self.Encoder = nn.Sequential(  # in(3*256*256)
             nn.Conv2d(3, 8, kernel_size=11, stride=4, padding=5),  # out(8*64*64)
-            # nn.BatchNorm2d(8),
+            nn.BatchNorm2d(8),
             nn.ReLU(inplace=True),
             nn.Conv2d(8, 16, kernel_size=5, stride=2, padding=2),  # out(16*32*32)
-            # nn.BatchNorm2d(16),
+            nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
             nn.Conv2d(16, 24, kernel_size=5, stride=2, padding=2),  # out(24*16*16)
-            # nn.BatchNorm2d(24),
+            nn.BatchNorm2d(24),
             nn.ReLU(inplace=True),
             nn.Conv2d(24, 16, kernel_size=5, stride=2, padding=2),  # out(16*8*8)
-            # nn.BatchNorm2d(16),
+            nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
         )
         self.Decoder = nn.Sequential(
             nn.ConvTranspose2d(16, 24, kernel_size=2, stride=2),  # out(16*16*16)
-            # nn.BatchNorm2d(24),
+            nn.BatchNorm2d(24),
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(24, 16, kernel_size=2, stride=2),  # out(16*32*32)
-            # nn.BatchNorm2d(16),
+            nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
             # nn.ConvTranspose2d(16, 12, kernel_size=2, stride=2),  # out(16*64*64)
             # nn.BatchNorm2d(12),
             # nn.ReLU(inplace=True),
             nn.ConvTranspose2d(16, 8, kernel_size=4, stride=4),  # out(16*128*128)
-            # nn.BatchNorm2d(8),
+            nn.BatchNorm2d(8),
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(8, 3, kernel_size=2, stride=2),  # out(3*256*256)
-            # nn.BatchNorm2d(3),
+            nn.BatchNorm2d(3),
             # nn.ReLU(inplace=True),
             nn.Tanh(),
         )
         self.fc = nn.Sequential(
             # nn.Linear(1024, 512),
             nn.Linear(8, 8),
-            # nn.BatchNorm2d(16),
+            nn.BatchNorm2d(16),
             # nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
             # nn.Linear(512, 512),
             nn.Linear(8, 8),
-            # nn.BatchNorm2d(16),
+            nn.BatchNorm2d(16),
             # nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
             # nn.Linear(512, 1024),
             nn.Linear(8, 8),
-            # nn.BatchNorm2d(16),
+            nn.BatchNorm2d(16),
             # nn.BatchNorm1d(1024),
             nn.ReLU(inplace=True),
         )
