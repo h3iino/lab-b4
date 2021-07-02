@@ -110,7 +110,7 @@ class CNN_AutoEncoder(nn.Module):
             nn.ReLU(inplace=True),
         )
         self.Decoder = nn.Sequential(
-            nn.ConvTranspose2d(16, 32, kernel_size=2, stride=2),  # out(16*16*16)
+            nn.ConvTranspose2d(8, 32, kernel_size=2, stride=2),  # out(16*16*16)
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(32, 16, kernel_size=2, stride=2),  # out(16*32*32)
