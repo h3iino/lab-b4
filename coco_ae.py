@@ -102,18 +102,18 @@ class CNN_AutoEncoder(nn.Module):
             nn.Conv2d(8, 16, kernel_size=5, stride=2, padding=2),  # out(16*32*32)
             nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
-            nn.Conv2d(16, 24, kernel_size=5, stride=2, padding=2),  # out(24*16*16)
-            nn.BatchNorm2d(24),
+            nn.Conv2d(16, 32, kernel_size=5, stride=2, padding=2),  # out(24*16*16)
+            nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
-            nn.Conv2d(24, 16, kernel_size=5, stride=2, padding=2),  # out(16*8*8)
-            nn.BatchNorm2d(16),
+            nn.Conv2d(32, 8, kernel_size=5, stride=2, padding=2),  # out(16*8*8)
+            nn.BatchNorm2d(8),
             nn.ReLU(inplace=True),
         )
         self.Decoder = nn.Sequential(
-            nn.ConvTranspose2d(16, 24, kernel_size=2, stride=2),  # out(16*16*16)
-            nn.BatchNorm2d(24),
+            nn.ConvTranspose2d(16, 32, kernel_size=2, stride=2),  # out(16*16*16)
+            nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(24, 16, kernel_size=2, stride=2),  # out(16*32*32)
+            nn.ConvTranspose2d(32, 16, kernel_size=2, stride=2),  # out(16*32*32)
             nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
             # nn.ConvTranspose2d(16, 12, kernel_size=2, stride=2),  # out(16*64*64)
@@ -130,17 +130,17 @@ class CNN_AutoEncoder(nn.Module):
         self.fc = nn.Sequential(
             # nn.Linear(1024, 512),
             nn.Linear(8, 8),
-            nn.BatchNorm2d(16),
+            nn.BatchNorm2d(8),
             # nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
             # nn.Linear(512, 512),
             nn.Linear(8, 8),
-            nn.BatchNorm2d(16),
+            nn.BatchNorm2d(8),
             # nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
             # nn.Linear(512, 1024),
             nn.Linear(8, 8),
-            nn.BatchNorm2d(16),
+            nn.BatchNorm2d(8),
             # nn.BatchNorm1d(1024),
             nn.ReLU(inplace=True),
         )
