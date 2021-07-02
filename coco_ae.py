@@ -119,7 +119,7 @@ class CNN_AutoEncoder(nn.Module):
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(64, 128, kernel_size=2, stride=2),  # out(16*32*32)
-            nn.BatchNorm2d(64),
+            nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(128, 128, kernel_size=4, stride=4),  # out(16*64*64)
             nn.BatchNorm2d(128),
