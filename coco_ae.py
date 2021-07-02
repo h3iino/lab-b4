@@ -173,8 +173,8 @@ class CNN_AutoEncoder(nn.Module):
     def forward(self, x):
         x = self.Encoder(x)
 
-        x = x.reshape(-1, 1024)
-        # x = x.reshape(1024)
+        # x = x.reshape(-1, 1024)
+        x = x.reshape(1024)
         print(x.shape)
         # x = self.fc(x)
         x = self.fc1(x)
