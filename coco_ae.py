@@ -291,9 +291,9 @@ def show_image(img, image_flag):
     plt.show()
 
 def main():
-    num_epoch = 50
+    num_epoch = 200
     # num_batch = 128
-    num_batch = 4
+    num_batch = 1
     data_train_num = 200
     data_val_num = 50
     data_test_num = 50
