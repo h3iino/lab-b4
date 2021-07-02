@@ -164,6 +164,7 @@ class CNN_AutoEncoder(nn.Module):
         x = self.Encoder(x)
 
         x = x.reshape(-1, 1024)
+        print(x.shape)
         x = self.fc(x)
         x = x.reshape(-1, 16, 8, 8)
 
