@@ -140,7 +140,7 @@ class CNN_AutoEncoder(nn.Module):
             # nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
             # nn.Linear(512, 1024),
-            nn.Linear(4, 16),
+            nn.Linear(4, 8),
             nn.BatchNorm2d(8),
             # nn.BatchNorm1d(1024),
             nn.ReLU(inplace=True),
