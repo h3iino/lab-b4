@@ -106,12 +106,12 @@ class CNN_AutoEncoder(nn.Module):
             nn.Conv2d(32, 64, kernel_size=5, stride=2, padding=2),  # out(24*16*16)
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
-            nn.Conv2d(64, 8, kernel_size=5, stride=2, padding=2),  # out(16*8*8)
-            nn.BatchNorm2d(8),
+            nn.Conv2d(64, 16, kernel_size=5, stride=2, padding=2),  # out(16*8*8)
+            nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
         )
         self.Decoder = nn.Sequential(
-            nn.ConvTranspose2d(8, 64, kernel_size=2, stride=2),  # out(16*16*16)
+            nn.ConvTranspose2d(16, 64, kernel_size=2, stride=2),  # out(16*16*16)
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(64, 32, kernel_size=2, stride=2),  # out(16*32*32)
@@ -130,18 +130,18 @@ class CNN_AutoEncoder(nn.Module):
         )
         self.fc = nn.Sequential(
             # nn.Linear(1024, 512),
-            nn.Linear(8, 8),
-            nn.BatchNorm2d(8),
+            nn.Linear(8, 4),
+            nn.BatchNorm2d(16),
             # nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
             # nn.Linear(512, 512),
-            nn.Linear(8, 8),
-            nn.BatchNorm2d(8),
+            nn.Linear(4, 4),
+            nn.BatchNorm2d(16),
             # nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
             # nn.Linear(512, 1024),
-            nn.Linear(8, 8),
-            nn.BatchNorm2d(8),
+            nn.Linear(4, 16),
+            nn.BatchNorm2d(16),
             # nn.BatchNorm1d(1024),
             nn.ReLU(inplace=True),
         )
