@@ -128,14 +128,17 @@ class CNN_AutoEncoder(nn.Module):
             nn.Tanh(),
         )
         self.fc = nn.Sequential(
-            nn.Linear(1024, 512),
-            nn.BatchNorm1d(512),
+            # nn.Linear(1024, 512),
+            nn.Linear(3, 3),
+            # nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
-            nn.Linear(512, 512),
-            nn.BatchNorm1d(512),
+            # nn.Linear(512, 512),
+            nn.Linear(3, 3),
+            # nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
-            nn.Linear(512, 1024),
-            nn.BatchNorm1d(1024),
+            # nn.Linear(512, 1024),
+            nn.Linear(3, 3),
+            # nn.BatchNorm1d(1024),
             nn.ReLU(inplace=True),
         )
 
@@ -158,7 +161,7 @@ class CNN_AutoEncoder(nn.Module):
 
         # x = x.reshape(-1, 1024)
         x = self.fc(x)
-        x = x.reshape(-1, 16, 8, 8)
+        # x = x.reshape(-1, 16, 8, 8)
 
         x = self.Decoder(x)
 
