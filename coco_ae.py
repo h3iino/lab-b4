@@ -96,46 +96,46 @@ class CNN_AutoEncoder(nn.Module):
     def __init__(self):
         super(CNN_AutoEncoder, self).__init__()
         self.Encoder = nn.Sequential(  # in(3*256*256)
-            nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5),  # out(64*64*64)
-            nn.BatchNorm2d(16),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(16, 16, kernel_size=5, stride=2, padding=2),  # out(32*32*32)
-            nn.BatchNorm2d(16),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(16, 16, kernel_size=5, stride=2, padding=2),  # out(16*16*16)
-            nn.BatchNorm2d(16),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(16, 8, kernel_size=5, stride=2, padding=2),  # out(16*8*8)
+            nn.Conv2d(3, 8, kernel_size=11, stride=4, padding=5),  # out(64*64*64)
             nn.BatchNorm2d(8),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(8, 16, kernel_size=5, stride=2, padding=2),  # out(32*32*32)
+            nn.BatchNorm2d(16),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(16, 24, kernel_size=5, stride=2, padding=2),  # out(16*16*16)
+            nn.BatchNorm2d(24),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(24, 16, kernel_size=5, stride=2, padding=2),  # out(16*8*8)
+            nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
         )
         self.Decoder = nn.Sequential(
-            nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2),  # out(16*16*16)
+            nn.ConvTranspose2d(16, 24, kernel_size=2, stride=2),  # out(16*16*16)
+            nn.BatchNorm2d(24),
+            nn.ReLU(inplace=True),
+            nn.ConvTranspose2d(24, 16, kernel_size=2, stride=2),  # out(16*32*32)
+            nn.BatchNorm2d(16),
+            nn.ReLU(inplace=True),
+            nn.ConvTranspose2d(16, 12, kernel_size=2, stride=2),  # out(16*64*64)
+            nn.BatchNorm2d(12),
+            nn.ReLU(inplace=True),
+            nn.ConvTranspose2d(12, 8, kernel_size=2, stride=2),  # out(16*128*128)
             nn.BatchNorm2d(8),
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(8, 16, kernel_size=2, stride=2),  # out(16*32*32)
-            nn.BatchNorm2d(16),
-            nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(16, 16, kernel_size=2, stride=2),  # out(16*64*64)
-            nn.BatchNorm2d(16),
-            nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(16, 16, kernel_size=2, stride=2),  # out(16*128*128)
-            nn.BatchNorm2d(16),
-            nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(16, 3, kernel_size=2, stride=2),  # out(3*256*256)
+            nn.ConvTranspose2d(8, 3, kernel_size=2, stride=2),  # out(3*256*256)
             nn.BatchNorm2d(3),
             # nn.ReLU(inplace=True),
             nn.Tanh(),
         )
         self.fc = nn.Sequential(
-            nn.Linear(512, 512),
+            nn.Linear(1024, 512),
             nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
             nn.Linear(512, 512),
             nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
-            nn.Linear(512, 512),
-            nn.BatchNorm1d(512),
+            nn.Linear(512, 1024),
+            nn.BatchNorm1d(1024),
             nn.ReLU(inplace=True),
         )
 
@@ -156,9 +156,9 @@ class CNN_AutoEncoder(nn.Module):
     def forward(self, x):
         x = self.Encoder(x)
 
-        x = x.reshape(-1, 512)
+        x = x.reshape(-1, 1024)
         x = self.fc(x)
-        x = x.reshape(-1, 8, 8, 8)
+        x = x.reshape(-1, 16, 8, 8)
 
         x = self.Decoder(x)
 
@@ -228,7 +228,7 @@ def drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss"):
     plt.ylabel('loss')
     plt.title('Training and validation ' + draw_flag)
     plt.grid()
-    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0623.png")
+    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0702.png")
     # loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0615.png")
     plt.show()
 
@@ -255,16 +255,17 @@ def show_image(img, image_flag):
     npimg = img.detach().numpy()
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0623.png")
+    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0702.png")
     # figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_0615.png")
     plt.show()
 
 def main():
-    num_epoch = 100
-    num_batch = 128
-    data_train_num = 2000
-    data_val_num = 500
-    data_test_num = 500
+    num_epoch = 50
+    # num_batch = 128
+    num_batch = 64
+    data_train_num = 200
+    data_val_num = 50
+    data_test_num = 50
     train_loss_list = []
     # train_acc_list = []
     val_loss_list = []
@@ -368,6 +369,7 @@ def main():
     # initialize parameters
     model2 = CNN_AutoEncoder().to(device)
     optimizer2 = torch.optim.Adam(model2.parameters(), lr=0.001)   #adam  lr=0.0001
+    criterion2 = torch.nn.MSELoss()
     # read parameters of the model
     # model_path = 'model_ae_50.pth'
     # model_path = 'model_ae_' + str(epoch+1) + '.pth'
@@ -378,7 +380,7 @@ def main():
     # test
     model2.eval()
     print('Test begin...')
-    ave_test_loss, outputs_and_inputs = testing(test_loader, model2, criterion, optimizer2, device, model_flag)
+    ave_test_loss, outputs_and_inputs = testing(test_loader, model2, criterion2, optimizer2, device, model_flag)
     print(f"Test Loss: {ave_test_loss:.5f}")
     # 入力画像と出力画像を表示
     output_image, input_image = outputs_and_inputs[-1]
