@@ -99,11 +99,11 @@ class CNN_AutoEncoder(nn.Module):
             nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5),  # out(8*64*64)
             nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
-            # nn.Conv2d(16, 32, kernel_size=5, stride=2, padding=2),  # out(16*32*32)
-            nn.Conv2d(16, 64, kernel_size=5, stride=4, padding=2),  # out(16*16*16)
-            # nn.BatchNorm2d(32),
-            # nn.ReLU(inplace=True),
-            # nn.Conv2d(32, 64, kernel_size=5, stride=2, padding=2),  # out(24*16*16)
+            nn.Conv2d(16, 32, kernel_size=5, stride=2, padding=2),  # out(16*32*32)
+            # nn.Conv2d(16, 64, kernel_size=5, stride=4, padding=2),  # out(16*16*16)
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32, 64, kernel_size=5, stride=2, padding=2),  # out(24*16*16)
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
             nn.Conv2d(64, 8, kernel_size=5, stride=2, padding=2),  # out(16*8*8)
