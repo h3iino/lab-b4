@@ -189,7 +189,7 @@ class CNN_AutoEncoder(nn.Module):
         x = self.rl1(self.bn1(self.fc1(x)))
         # x = self.rl2(self.bn2(self.fc2(x)))
         x = self.rl3(self.bn3(self.fc3(x)))
-        # x = x.reshape(-1, 8, 16, 16)
+        x = x.reshape(-1, 1, 64, 64)
 
         x = self.Decoder(x)
 
