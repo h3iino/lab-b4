@@ -184,7 +184,7 @@ class CNN_AutoEncoder(nn.Module):
         x = self.Encoder(x)
 
         # x = x.reshape(-1, 512)
-        x = nn.flatten(x)
+        x = nn.Flatten(x)
         # print(x.shape)
         # x = self.fc(x)
         x = self.rl1(self.bn1(self.fc1(x)))
