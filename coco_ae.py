@@ -97,19 +97,19 @@ class CNN_AutoEncoder(nn.Module):
         super(CNN_AutoEncoder, self).__init__()
         self.Encoder = nn.Sequential(  # in(3*256*256)
             # nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=5),  # out(8*64*64)
-            nn.Conv2d(3, 16, kernel_size=5, stride=2, padding=2),  # out(64*128*128)
-            nn.BatchNorm2d(16),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(16, 64, kernel_size=5, stride=2, padding=2),  # out(64*64*64)
-            nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(64, 128, kernel_size=5, stride=2, padding=2),  # out(16*32*32)
-            # nn.Conv2d(16, 64, kernel_size=5, stride=4, padding=2),  # out(16*16*16)
+            nn.Conv2d(3, 128, kernel_size=5, stride=2, padding=2),  # out(64*128*128)
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
-            nn.Conv2d(128, 4, kernel_size=5, stride=2, padding=2),  # out(24*16*16)
-            nn.BatchNorm2d(4),
+            nn.Conv2d(128, 64, kernel_size=5, stride=2, padding=2),  # out(64*64*64)
+            nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
+            nn.Conv2d(64, 1, kernel_size=5, stride=2, padding=2),  # out(16*32*32)
+            # nn.Conv2d(16, 64, kernel_size=5, stride=4, padding=2),  # out(16*16*16)
+            nn.BatchNorm2d(1),
+            nn.ReLU(inplace=True),
+            # nn.Conv2d(64, 4, kernel_size=5, stride=2, padding=2),  # out(24*16*16)
+            # nn.BatchNorm2d(4),
+            # nn.ReLU(inplace=True),
             # nn.Conv2d(32, 16, kernel_size=5, stride=2, padding=2),  # out(16*8*8)
             # nn.BatchNorm2d(16),
             # nn.ReLU(inplace=True),
@@ -177,19 +177,13 @@ class CNN_AutoEncoder(nn.Module):
     def forward(self, x):
         x = self.Encoder(x)
 
-        x = x.reshape(-1, 1024)
-        # x = x.reshape(1024)
+        # x = x.reshape(-1, 1024)
         # print(x.shape)
         # x = self.fc(x)
-        x = self.fc1(x)
-        # print(x.shape)
-        x = self.bn1(x)
-        # print(x.shape)
-        x = self.rl1(x)
         # x = self.rl1(self.bn1(self.fc1(x)))
-        x = self.rl2(self.bn2(self.fc2(x)))
-        x = self.rl3(self.bn3(self.fc3(x)))
-        x = x.reshape(-1, 16, 8, 8)
+        # x = self.rl2(self.bn2(self.fc2(x)))
+        # x = self.rl3(self.bn3(self.fc3(x)))
+        # x = x.reshape(-1, 16, 8, 8)
 
         x = self.Decoder(x)
 
