@@ -137,7 +137,8 @@ class CNN_AutoEncoder(nn.Module):
             nn.Tanh(),
         )
         self.Decoder4 = nn.Sequential(
-            nn.ConvTranspose2d(8, 3, kernel_size=2, stride=2),  # out(3*16*16)
+            # nn.ConvTranspose2d(8, 3, kernel_size=2, stride=2),  # out(3*16*16)
+            nn.ConvTranspose2d(2, 3, kernel_size=1, stride=1),  # out(3*16*16)
             nn.BatchNorm2d(3),
             # nn.ReLU(inplace=True),
             # nn.Sigmoid(),
@@ -177,8 +178,7 @@ class CNN_AutoEncoder(nn.Module):
         dec1_x = self.Decoder1(mid_x)
         dec2_x = self.Decoder2(mid_x)
         dec3_x = self.Decoder3(mid_x)
-        # dec4_x = self.Decoder4(mid_x)
-        dec4_x = mid_x
+        dec4_x = self.Decoder4(mid_x)
 
         # x = self.conv1(x)
         # x = self.relu1(x)
