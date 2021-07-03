@@ -303,9 +303,9 @@ def show_image(img, image_flag):
     plt.show()
 
 def main():
-    num_epoch = 50
-    num_batch = 2
-    data_train_num = 200
+    num_epoch = 100
+    num_batch = 20
+    data_train_num = 2000
     data_val_num = 50
     data_test_num = 50
     train_loss_list = []
