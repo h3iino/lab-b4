@@ -120,7 +120,7 @@ class CNN_AutoEncoder(nn.Module):
             nn.ConvTranspose2d(2, 64, kernel_size=2, stride=2),  # out(64*32*32)
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(64, 3, kernel_size=4, stride=4),  # out(3*64*64)
+            nn.ConvTranspose2d(64, 3, kernel_size=2, stride=2),  # out(3*64*64)
             nn.BatchNorm2d(3),
             # nn.ReLU(inplace=True),
             # nn.Sigmoid(),
@@ -238,12 +238,9 @@ def training(train_loader, model, criterion, optimizer, device):
         
         loss = criterion(outputs, images)
         loss_lap256 = laploss(outputs, images, criterion, stages=8)
-        loss_lap64 = laploss(r64_outputs, resize64_images, criterion, stages=4)
-        loss_lap32 = laploss(r32_outputs, resize32_images, criterion, stages=3)
-        loss_lap16 = laploss(r16_outputs, resize16_images, criterion, stages=2)
-        # loss_lap64 = laploss(r64_outputs, resize64_images, criterion, stages=6)
-        # loss_lap32 = laploss(r32_outputs, resize32_images, criterion, stages=5)
-        # loss_lap16 = laploss(r16_outputs, resize16_images, criterion, stages=4)
+        loss_lap64 = laploss(r64_outputs, resize64_images, criterion, stages=6)
+        loss_lap32 = laploss(r32_outputs, resize32_images, criterion, stages=5)
+        loss_lap16 = laploss(r16_outputs, resize16_images, criterion, stages=4)
         loss = loss + loss_lap256 + loss_lap64 + loss_lap32 + loss_lap16
 
         loss.backward()
