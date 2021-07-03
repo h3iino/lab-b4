@@ -150,14 +150,20 @@ class CNN_AutoEncoder(nn.Module):
             nn.ReLU(inplace=True),
         )
 
-        self.fc1 = nn.Linear(1024, 768)
-        self.bn1 = nn.BatchNorm1d(768)
+        # self.fc1 = nn.Linear(1024, 768)
+        # self.bn1 = nn.BatchNorm1d(768)
+        self.fc1 = nn.Linear(16, 8)
+        self.bn1 = nn.BatchNorm2d(8)
         self.rl1 = nn.ReLU(inplace=True)
-        self.fc2 = nn.Linear(768, 512)
-        self.bn2 = nn.BatchNorm1d(512)
+        # self.fc2 = nn.Linear(768, 512)
+        # self.bn2 = nn.BatchNorm1d(512)
+        self.fc2 = nn.Linear(8, 8)
+        self.bn2 = nn.BatchNorm2d(8)
         self.rl2 = nn.ReLU(inplace=True)
-        self.fc3 = nn.Linear(512, 1024)
-        self.bn3 = nn.BatchNorm1d(1024)
+        # self.fc3 = nn.Linear(512, 1024)
+        # self.bn3 = nn.BatchNorm1d(1024)
+        self.fc3 = nn.Linear(8, 16)
+        self.bn3 = nn.BatchNorm2d(16)
         self.rl3 = nn.ReLU(inplace=True)
 
         # self.conv1 = nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5)  # out(16*64*64)
@@ -177,13 +183,13 @@ class CNN_AutoEncoder(nn.Module):
     def forward(self, x):
         x = self.Encoder(x)
 
-        x = x.reshape(-1, 1024)
+        # x = x.reshape(-1, 1024)
         # print(x.shape)
         # x = self.fc(x)
         x = self.rl1(self.bn1(self.fc1(x)))
         x = self.rl2(self.bn2(self.fc2(x)))
         x = self.rl3(self.bn3(self.fc3(x)))
-        x = x.reshape(-1, 4, 16, 16)
+        # x = x.reshape(-1, 4, 16, 16)
 
         x = self.Decoder(x)
 
