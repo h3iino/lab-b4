@@ -170,10 +170,10 @@ class CNN_AutoEncoder(nn.Module):
     def forward(self, x):
         enc_x = self.Encoder(x)
 
-        mid_x = enc_x.view(-1, 512)
-        mid_x = self.fc(mid_x)
-        mid_x = mid_x.view(-1, 2, 16, 16)
-        # mid_x = enc_x
+        # mid_x = enc_x.view(-1, 512)
+        # mid_x = self.fc(mid_x)
+        # mid_x = mid_x.view(-1, 2, 16, 16)
+        mid_x = enc_x
 
         dec1_x = self.Decoder1(mid_x)
         dec2_x = self.Decoder2(mid_x)
