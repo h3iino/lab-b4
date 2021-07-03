@@ -93,7 +93,7 @@ class CNN_AutoEncoder(nn.Module):
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
             nn.Conv2d(32, 2, kernel_size=5, stride=2, padding=2),  # out(16*16*16)
-            nn.BatchNorm2d(16),
+            nn.BatchNorm2d(2),
             nn.ReLU(inplace=True),
             # nn.MaxPool2d(kernel_size=2, stride=2),  # out(8*8*8)
             # nn.Conv2d(16, 8, kernel_size=5, stride=2, padding=2),  # out(8*8*8)
