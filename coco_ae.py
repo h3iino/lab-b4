@@ -295,8 +295,8 @@ def show_image(img, image_flag):
 
 def main():
     num_epoch = 50
-    num_batch = 128
-    # num_batch = 2
+    # num_batch = 128
+    num_batch = 32
     data_train_num = 2000
     data_val_num = 50
     data_test_num = 50
