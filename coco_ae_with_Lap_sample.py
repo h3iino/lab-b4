@@ -153,10 +153,10 @@ class CNN_AutoEncoder(nn.Module):
     def forward(self, x):
         enc_x = self.Encoder(x)
 
-        mid_x = enc_x.reshape(-1, 512)
-        mid_x = self.fc(mid_x)
-        mid_x = mid_x.reshape(-1, 8, 8, 8)
-        # mid_x = enc_x
+        # mid_x = enc_x.reshape(-1, 512)
+        # mid_x = self.fc(mid_x)
+        # mid_x = mid_x.reshape(-1, 8, 8, 8)
+        mid_x = enc_x
 
         dec1_x = self.Decoder1(mid_x)
         dec2_x = self.Decoder2(mid_x)
@@ -275,7 +275,7 @@ def drawing_graph(num_epoch, train_loss_list, val_loss_list, draw_flag="loss"):
     plt.ylabel('loss')
     plt.title('Training and validation ' + draw_flag)
     plt.grid()
-    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_lap_0623.png")
+    loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_lap_0703.png")
     # loss_fig.savefig(path + "coco_AutoEncoder_" + draw_flag + "_0623.png")
     plt.show()
 
@@ -290,16 +290,16 @@ def show_image(img, image_flag):
     npimg = img.detach().numpy()
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_lap_sample_0623.png")
+    figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_lap_sample_0703.png")
     # figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0623.png")
     plt.show()
 
 def main():
     num_epoch = 100
-    num_batch = 128
-    data_train_num = 2000
-    data_val_num = 500
-    data_test_num = 500
+    num_batch = 2
+    data_train_num = 200
+    data_val_num = 50
+    data_test_num = 50
     train_loss_list = []
     # train_acc_list = []
     val_loss_list = []
