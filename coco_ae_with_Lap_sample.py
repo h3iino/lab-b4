@@ -170,9 +170,9 @@ class CNN_AutoEncoder(nn.Module):
     def forward(self, x):
         enc_x = self.Encoder(x)
 
-        mid_x = enc_x.reshape(-1, 512)
+        mid_x = enc_x.view(-1, 512)
         mid_x = self.fc(mid_x)
-        mid_x = mid_x.reshape(-1, 2, 16, 16)
+        mid_x = mid_x.view(-1, 2, 16, 16)
         # mid_x = enc_x
 
         dec1_x = self.Decoder1(mid_x)
@@ -313,8 +313,8 @@ def show_image(img, image_flag):
 
 def main():
     num_epoch = 100
-    num_batch = 20
-    data_train_num = 2000
+    num_batch = 2
+    data_train_num = 200
     data_val_num = 50
     data_test_num = 50
     train_loss_list = []
