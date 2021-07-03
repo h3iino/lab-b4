@@ -172,7 +172,7 @@ class CNN_AutoEncoder(nn.Module):
 
         mid_x = enc_x.reshape(-1, 512)
         mid_x = self.fc(mid_x)
-        mid_x = mid_x.reshape(-1, 8, 8, 8)
+        mid_x = mid_x.reshape(-1, 2, 16, 16)
         # mid_x = enc_x
 
         dec1_x = self.Decoder1(mid_x)
