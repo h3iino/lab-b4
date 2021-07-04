@@ -175,8 +175,8 @@ class CNN_AutoEncoder(nn.Module):
         # mid_x = enc_x.view(-1, 512)
         batch_size = 4  # 仮（num_batchと要連携）
         mid_x = enc_x.view(batch_size, -1)
-        # x = self.flatten(x)
-        # print(x.shape)
+        print(enc_x.shape)
+        print(mid_x.shape)
         # x = self.fc(x)
         mid_x = self.rl1(self.bn1(self.fc1(mid_x)))
         mid_x = self.rl2(self.bn2(self.fc2(mid_x)))
