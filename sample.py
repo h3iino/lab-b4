@@ -24,6 +24,6 @@ loss = criterion(outputs, images)
 print(loss)
 
 np.set_printoptions(threshold=np.inf)
-print(im_in[120, 100:130])
+print(im_in[140, 100:130])
 print("------------")
-print(im_out[120, 100:130])
+print(im_out[140, 100:130])
