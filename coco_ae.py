@@ -169,11 +169,11 @@ class CNN_AutoEncoder(nn.Module):
 
 
     def forward(self, x):
+        batch_size = x.shape[0]
         enc_x = self.Encoder(x)
 
         # x = x.reshape(-1, 512)
         # mid_x = enc_x.view(-1, 512)
-        batch_size = 4  # 仮（num_batchと要連携）
         mid_x = enc_x.view(batch_size, -1)
         print(enc_x.shape)
         print(mid_x.shape)
@@ -181,7 +181,7 @@ class CNN_AutoEncoder(nn.Module):
         mid_x = self.rl1(self.bn1(self.fc1(mid_x)))
         mid_x = self.rl2(self.bn2(self.fc2(mid_x)))
         # mid_x = self.rl3(self.bn3(self.fc3(mid_x)))
-        dec_x = mid_x.view(-1, 2, 16, 16)
+        dec_x = mid_x.view(batch_size, 2, 16, 16)
         # print(x.shape)
 
         x = self.Decoder(dec_x)
@@ -288,8 +288,8 @@ def main():
     # num_batch = 128
     num_batch = 4
     data_train_num = 200
-    data_val_num = 52
-    data_test_num = 52
+    data_val_num = 50
+    data_test_num = 50
     train_loss_list = []
     # train_acc_list = []
     val_loss_list = []
