@@ -118,7 +118,7 @@ class CNN_AutoEncoder(nn.Module):
             nn.ReLU(inplace=True),
         )
         self.Decoder = nn.Sequential(
-            nn.ConvTranspose2d(8, 32, kernel_size=2, stride=2),  # out(16*8*8)
+            nn.ConvTranspose2d(32, 32, kernel_size=2, stride=2),  # out(16*8*8)
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(32, 32, kernel_size=2, stride=2),  # out(16*16*16)
@@ -188,11 +188,11 @@ class CNN_AutoEncoder(nn.Module):
         # mid_x = self.rl1(self.bn1(self.fc1(mid_x)))
         mid_x = self.rl2(self.bn2(self.fc2(mid_x)))
         # mid_x = self.rl3(self.bn3(self.fc3(mid_x)))
-        print("m", mid_x.shape)
+        # print("m", mid_x.shape)
         dec_x = mid_x.clone()
         dec_x = dec_x.view(batch_size, 32, 4, 4)
         # dec_x = dec_x.view(batch_size, 2, 16, 16)
-        print("d", dec_x)
+        # print("d", dec_x.shape)
 
         dec_x = self.Decoder(dec_x)
 
