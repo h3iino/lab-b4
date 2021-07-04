@@ -121,12 +121,12 @@ class CNN_AutoEncoder(nn.Module):
             # nn.ConvTranspose2d(2, 64, kernel_size=2, stride=2),  # out(64*32*32)
             # nn.BatchNorm2d(64),
             # nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(1, 128, kernel_size=4, stride=4),  # out(128*64*64)
+            nn.ConvTranspose2d(1, 64, kernel_size=2, stride=2),  # out(64*64*64)
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            nn.ConvTranspose2d(64, 128, kernel_size=2, stride=2),  # out(128*128*128)
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
-            # nn.ConvTranspose2d(16, 8, kernel_size=2, stride=2),  # out(16*128*128)
-            # nn.BatchNorm2d(8),
-            # nn.ReLU(inplace=True),
             nn.ConvTranspose2d(128, 3, kernel_size=2, stride=2),  # out(3*256*256)
             nn.BatchNorm2d(3),
             # nn.ReLU(inplace=True),
@@ -136,17 +136,17 @@ class CNN_AutoEncoder(nn.Module):
             nn.Linear(512, 512),
             # nn.Linear(16, 8),
             # nn.BatchNorm2d(8),
-            nn.BatchNorm1d(512),
+            # nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
             nn.Linear(512, 512),
             # nn.Linear(8, 8),
             # nn.BatchNorm2d(8),
-            nn.BatchNorm1d(512),
+            # nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
             nn.Linear(512, 1024),
             # nn.Linear(8, 16),
             # nn.BatchNorm2d(8),
-            nn.BatchNorm1d(1024),
+            # nn.BatchNorm1d(1024),
             nn.ReLU(inplace=True),
         )
 
