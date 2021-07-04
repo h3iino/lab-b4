@@ -8,10 +8,17 @@ im_out = np.array(Image.open('movies/coco_AutoEncoder_out_sample_0702.png'))
 im_in_t = torch.Tensor(im_in)
 im_out_t = torch.Tensor(im_out)
 
+images = torch.Tensor(Image.open('movies/coco_AutoEncoder_in_sample_0702.png'))
+outputs = torch.Tensor(Image.open('movies/coco_AutoEncoder_out_sample_0702.png'))
+
 # tmp = im_in**2 - im_out**2
-tmp = im_in_t**2 - im_out_t**2
+# tmp = im_in_t**2 - im_out_t**2
 
-tmp2 = np.average(tmp)
-tmp2 = torch.mean(tmp)
+criterion = torch.nn.MSELoss()
+loss = criterion(outputs, images)
 
-print(tmp2)
+# tmp2 = np.average(tmp)
+# tmp2 = torch.mean(tmp)
+
+# print(tmp2)
+print(loss)
