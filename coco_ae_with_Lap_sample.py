@@ -245,8 +245,8 @@ def training(train_loader, model, criterion, optimizer, device):
         loss_lap32 = laploss(r32_outputs, resize32_images, criterion, stages=3)
         # loss_lap16 = laploss(r16_outputs, resize16_images, criterion, stages=4)
         loss_lap16 = laploss(r16_outputs, resize16_images, criterion, stages=3)
-        # loss = loss + loss_lap256 + loss_lap64 + loss_lap32 + loss_lap16
-        loss = loss_lap256 + loss_lap64 + loss_lap32 + loss_lap16
+        loss = loss + loss_lap256 + loss_lap64 + loss_lap32 + loss_lap16
+        # loss = loss_lap256 + loss_lap64 + loss_lap32 + loss_lap16
 
         loss.backward()
         optimizer.step()
@@ -317,7 +317,7 @@ def show_image(img, image_flag):
     plt.show()
 
 def main():
-    num_epoch = 100
+    num_epoch = 50
     num_batch = 2
     data_train_num = 200
     data_val_num = 50
