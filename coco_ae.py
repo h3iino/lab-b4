@@ -151,7 +151,7 @@ class CNN_AutoEncoder(nn.Module):
         )
 
         self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(1024, 512)
+        self.fc1 = nn.Linear(512, 512)
         self.bn1 = nn.BatchNorm1d(512)
         # self.fc1 = nn.Linear(8, 4)
         # self.bn1 = nn.BatchNorm2d(4)
@@ -180,7 +180,7 @@ class CNN_AutoEncoder(nn.Module):
         # print("e", enc_x.dtype)
         # print("m", mid_x)
         # x = self.fc(x)
-        # mid_x = self.rl1(self.bn1(self.fc1(mid_x)))
+        mid_x = self.rl1(self.bn1(self.fc1(mid_x)))
         mid_x = self.rl2(self.bn2(self.fc2(mid_x)))
         # mid_x = self.rl3(self.bn3(self.fc3(mid_x)))
         dec_x = mid_x.clone()
