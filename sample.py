@@ -12,6 +12,6 @@ im_out_t = torch.Tensor(im_out)
 tmp = im_in_t**2 - im_out_t**2
 
 tmp2 = np.average(tmp)
-tmp2 = torch.average(tmp)
+tmp2 = torch.mean(tmp)
 
 print(tmp2)
