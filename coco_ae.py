@@ -184,15 +184,15 @@ class CNN_AutoEncoder(nn.Module):
         mid_x = enc_x.clone()
         mid_x = mid_x.view(batch_size, -1)
         # print("e", enc_x.dtype)
-        # print("m", mid_x)
         # x = self.fc(x)
         # mid_x = self.rl1(self.bn1(self.fc1(mid_x)))
         mid_x = self.rl2(self.bn2(self.fc2(mid_x)))
         # mid_x = self.rl3(self.bn3(self.fc3(mid_x)))
+        print("m", mid_x.shape)
         dec_x = mid_x.clone()
         dec_x = dec_x.view(batch_size, 32, 4, 4)
         # dec_x = dec_x.view(batch_size, 2, 16, 16)
-        # print("d", dec_x)
+        print("d", dec_x)
 
         dec_x = self.Decoder(dec_x)
 
