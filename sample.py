@@ -1,6 +1,6 @@
 from PIL import Image
 import numpy as np
-import np.set_printoptions(threshold=np.inf)
+import np.set_printoptions
 import torch
 
 im_in = np.array(Image.open('movies/coco_AutoEncoder_in_sample_0702.png'))
@@ -24,4 +24,5 @@ loss = criterion(outputs, images)
 # print(tmp2)
 print(loss)
 
+np.set_printoptions(threshold=np.inf)
 print(im_out)
