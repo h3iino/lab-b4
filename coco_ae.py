@@ -93,7 +93,7 @@ class Coco_Dataset(torch.utils.data.Dataset):
 
 class CNN_AutoEncoder(nn.Module):
 
-    def __init__(self, batch_size):
+    def __init__(self):
         super(CNN_AutoEncoder, self).__init__()
         self.Encoder = nn.Sequential(  # in(3*256*256)
             # nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=5),  # out(8*64*64)
