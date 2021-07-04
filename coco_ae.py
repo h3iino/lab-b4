@@ -434,7 +434,7 @@ def main():
     loss = criterion(outputs, images)
     print(loss)
 
-    loss2 = criterion(outputs, output_image.reshape(-1, 3, 256, 256))
+    loss2 = criterion(outputs, output_image.reshape(3, 256, 256))
     print(loss2)
     
 
