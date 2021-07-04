@@ -293,6 +293,7 @@ def show_image(img, image_flag):
     figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0702.png")
     # figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_0615.png")
     plt.show()
+    return figure_image
 
 def main():
     num_epoch = 300
@@ -422,8 +423,8 @@ def main():
     output_image, input_image = outputs_and_inputs[-1]
     output_image = output_image.to('cpu')
     input_image = input_image.to('cpu')
-    show_image(input_image.reshape(-1, 3, 256, 256), image_flag="in")
-    show_image(output_image.reshape(-1, 3, 256, 256), image_flag="out")
+    _ = show_image(input_image.reshape(-1, 3, 256, 256), image_flag="in")
+    oo = show_image(output_image.reshape(-1, 3, 256, 256), image_flag="out")
 
     # debug
     im_in = np.array(Image.open('movies/coco_AutoEncoder_in_sample_0702.png'))
@@ -434,7 +435,7 @@ def main():
     loss = criterion(outputs, images)
     print(loss)
 
-    loss2 = criterion(outputs, output_image.reshape(3, 256, 256))
+    loss2 = criterion(outputs, oo)
     print(loss2)
     
 
