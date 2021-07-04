@@ -8,6 +8,9 @@ from PIL import Image
 import sys, os 
 sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 import cv2
+
+import pdb
+
 from pycocotools.coco import COCO
 
 torch.cuda.empty_cache()
@@ -289,7 +292,7 @@ def show_image(img, image_flag):
     #     # img = normalize_images(img)
     #     img = img.mul(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
     #     img = img.add(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
-    npimg = img.detach().numpy()
+    npimg = img.detach().numpy() * 255
     print("max", np.min(npimg))
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
@@ -302,6 +305,7 @@ def show_image(img, image_flag):
 
     figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0702.png")
     # figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_0615.png")
+    pdb.set_trace()
     plt.show()
     return npimg
 
