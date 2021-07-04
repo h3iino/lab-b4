@@ -1,6 +1,6 @@
 from PIL import Image
 import numpy as np
-import np.set_printoptions
+# import np.set_printoptions
 import torch
 
 im_in = np.array(Image.open('movies/coco_AutoEncoder_in_sample_0702.png'))
