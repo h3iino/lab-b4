@@ -297,7 +297,7 @@ def main():
     num_epoch = 300
     # num_batch = 128
     num_batch = 4
-    data_train_num = 200
+    data_train_num = 2000
     data_val_num = 50
     data_test_num = 50
     train_loss_list = []
