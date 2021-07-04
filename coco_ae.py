@@ -293,7 +293,7 @@ def show_image(img, image_flag):
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
 
-    cv2.imshow(npimg)
+    cv2.imshow("aa", npimg)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     cv2.imsave(path + "coco_AutoEncoder_" + image_flag + "_sample_0702.png", npimg)
