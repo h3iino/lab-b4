@@ -435,7 +435,7 @@ def main():
     loss = criterion(outputs, images)
     print(loss)
 
-    print("o", outputs)
+    print("o", outputs.shape)
     print("oi", output_image.shape)
 
     loss2 = criterion(outputs, output_image)
