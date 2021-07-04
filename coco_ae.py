@@ -290,7 +290,7 @@ def show_image(img, image_flag):
     #     img = img.mul(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
     #     img = img.add(torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1))
     npimg = img.detach().numpy()
-    print("max", np.max(npimg))
+    print("max", np.min(npimg))
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
 
