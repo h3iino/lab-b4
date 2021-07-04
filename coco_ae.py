@@ -187,13 +187,13 @@ class CNN_AutoEncoder(nn.Module):
         # x = x.reshape(-1, 512)
         x = x.view(-1, 512)
         # x = self.flatten(x)
-        print(x.shape)
+        # print(x.shape)
         # x = self.fc(x)
         x = self.rl1(self.bn1(self.fc1(x)))
         x = self.rl2(self.bn2(self.fc2(x)))
         # x = self.rl3(self.bn3(self.fc3(x)))
         x = x.view(-1, 2, 16, 16)
-        print(x.shape)
+        # print(x.shape)
 
         x = self.Decoder(x)
 
@@ -298,7 +298,7 @@ def main():
     num_epoch = 50
     # num_batch = 128
     num_batch = 4
-    data_train_num = 2000
+    data_train_num = 200
     data_val_num = 50
     data_test_num = 50
     train_loss_list = []
