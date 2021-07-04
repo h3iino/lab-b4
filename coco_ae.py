@@ -171,7 +171,7 @@ class CNN_AutoEncoder(nn.Module):
     def forward(self, x):
         batch_size = x.shape[0]
         enc_x = self.Encoder(x)
-        print(enc_x.shape)
+        # print(enc_x.shape)
 
         # x = x.reshape(-1, 512)
         # mid_x = enc_x.view(-1, 512)
