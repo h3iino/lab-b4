@@ -156,11 +156,11 @@ class CNN_AutoEncoder(nn.Module):
         # self.fc1 = nn.Linear(8, 4)
         # self.bn1 = nn.BatchNorm2d(4)
         self.rl1 = nn.ReLU(inplace=True)
-        self.fc2 = nn.Linear(512, 512)
-        self.bn2 = nn.BatchNorm1d(512)
+        # self.fc2 = nn.Linear(512, 512)
+        # self.bn2 = nn.BatchNorm1d(512)
         # # self.fc2 = nn.Linear(4, 4)
         # # self.bn2 = nn.BatchNorm2d(4)
-        self.rl2 = nn.ReLU(inplace=True)
+        # self.rl2 = nn.ReLU(inplace=True)
         self.fc3 = nn.Linear(512, 1024)
         self.bn3 = nn.BatchNorm1d(1024)
         # self.fc3 = nn.Linear(4, 8)
@@ -287,7 +287,7 @@ def show_image(img, image_flag):
     plt.show()
 
 def main():
-    num_epoch = 1000
+    num_epoch = 300
     # num_batch = 128
     num_batch = 4
     data_train_num = 200
