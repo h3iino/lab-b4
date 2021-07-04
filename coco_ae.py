@@ -288,8 +288,8 @@ def main():
     # num_batch = 128
     num_batch = 4
     data_train_num = 200
-    data_val_num = 50
-    data_test_num = 50
+    data_val_num = 52
+    data_test_num = 52
     train_loss_list = []
     # train_acc_list = []
     val_loss_list = []
