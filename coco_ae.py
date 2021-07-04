@@ -5,6 +5,7 @@ import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
 from PIL import Image
+import cv2
 import sys, os 
 from pycocotools.coco import COCO
 
@@ -291,7 +292,11 @@ def show_image(img, image_flag):
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
 
-    figure_image.subplots_adjust(left=0, right=0, bottom=0, top=0)
+    cv2.imshow(npimg)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    cv2.imsave(path + "coco_AutoEncoder_" + image_flag + "_sample_0702.png", npimg)
+    # figure_image.subplots_adjust(left=0, right=0, bottom=0, top=0)
 
     figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0702.png")
     # figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_0615.png")
