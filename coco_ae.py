@@ -434,5 +434,9 @@ def main():
     loss = criterion(outputs, images)
     print(loss)
 
+    loss2 = criterion(outputs, output_image)
+    print(loss2)
+    
+
 if __name__ == "__main__":
     main()
