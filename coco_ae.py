@@ -435,7 +435,10 @@ def main():
     loss = criterion(outputs, images)
     print(loss)
 
-    loss2 = criterion(outputs, torch.Tensor(oo))
+    print("o", outputs)
+    print("oi", output_image.shape)
+
+    loss2 = criterion(outputs, output_image)
     print(loss2)
     
 
