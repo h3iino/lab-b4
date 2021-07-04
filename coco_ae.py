@@ -103,13 +103,13 @@ class CNN_AutoEncoder(nn.Module):
             nn.Conv2d(128, 64, kernel_size=5, stride=2, padding=2),  # out(64*64*64)
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
-            nn.Conv2d(64, 32, kernel_size=5, stride=2, padding=2),  # out(32*32*32)
+            nn.Conv2d(64, 1, kernel_size=5, stride=2, padding=2),  # out(32*32*32)
             # nn.Conv2d(16, 64, kernel_size=5, stride=4, padding=2),  # out(16*16*16)
-            nn.BatchNorm2d(32),
+            nn.BatchNorm2d(1),
             nn.ReLU(inplace=True),
-            nn.Conv2d(32, 2, kernel_size=5, stride=2, padding=2),  # out(4*16*16)
-            nn.BatchNorm2d(2),
-            nn.ReLU(inplace=True),
+            # nn.Conv2d(32, 2, kernel_size=5, stride=2, padding=2),  # out(4*16*16)
+            # nn.BatchNorm2d(2),
+            # nn.ReLU(inplace=True),
             # nn.Conv2d(32, 8, kernel_size=5, stride=2, padding=2),  # out(16*8*8)
             # nn.BatchNorm2d(8),
             # nn.ReLU(inplace=True),
@@ -118,10 +118,10 @@ class CNN_AutoEncoder(nn.Module):
             # nn.ConvTranspose2d(8, 64, kernel_size=2, stride=2),  # out(16*16*16)
             # nn.BatchNorm2d(64),
             # nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(2, 64, kernel_size=2, stride=2),  # out(64*32*32)
-            nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(64, 128, kernel_size=4, stride=4),  # out(128*64*64)
+            # nn.ConvTranspose2d(2, 64, kernel_size=2, stride=2),  # out(64*32*32)
+            # nn.BatchNorm2d(64),
+            # nn.ReLU(inplace=True),
+            nn.ConvTranspose2d(1, 128, kernel_size=4, stride=4),  # out(128*64*64)
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
             # nn.ConvTranspose2d(16, 8, kernel_size=2, stride=2),  # out(16*128*128)
@@ -151,7 +151,7 @@ class CNN_AutoEncoder(nn.Module):
         )
 
         self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(512, 512)
+        self.fc1 = nn.Linear(1024, 512)
         self.bn1 = nn.BatchNorm1d(512)
         # self.fc1 = nn.Linear(8, 4)
         # self.bn1 = nn.BatchNorm2d(4)
@@ -184,7 +184,7 @@ class CNN_AutoEncoder(nn.Module):
         mid_x = self.rl2(self.bn2(self.fc2(mid_x)))
         mid_x = self.rl3(self.bn3(self.fc3(mid_x)))
         dec_x = mid_x.clone()
-        dec_x = dec_x.view(batch_size, 2, 16, 16)
+        dec_x = dec_x.view(batch_size, 1, 32, 32)
         # print("d", dec_x)
 
         dec_x = self.Decoder(dec_x)
