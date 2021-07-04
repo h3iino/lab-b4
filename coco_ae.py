@@ -175,14 +175,14 @@ class CNN_AutoEncoder(nn.Module):
         # x = x.reshape(-1, 512)
         # mid_x = enc_x.view(-1, 512)
         mid_x = enc_x.view(batch_size, -1)
-        print("e", enc_x.shape)
-        print("m", mid_x.shape)
+        # print("e", enc_x.shape)
+        # print("m", mid_x.shape)
         # x = self.fc(x)
         mid_x = self.rl1(self.bn1(self.fc1(mid_x)))
         mid_x = self.rl2(self.bn2(self.fc2(mid_x)))
         # mid_x = self.rl3(self.bn3(self.fc3(mid_x)))
         dec_x = mid_x.view(batch_size, 2, 16, 16)
-        print("d", dec_x.shape)
+        # print("d", dec_x.shape)
 
         x = self.Decoder(dec_x)
 
