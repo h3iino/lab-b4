@@ -184,7 +184,7 @@ class CNN_AutoEncoder(nn.Module):
         dec_x = mid_x.view(batch_size, 2, 16, 16)
         # print("d", dec_x.shape)
 
-        x = self.Decoder(dec_x)
+        dec_x = self.Decoder(dec_x)
 
         # x = self.conv1(x)
         # x = self.relu1(x)
@@ -200,7 +200,7 @@ class CNN_AutoEncoder(nn.Module):
         # x = self.t_conv3(x)
         # x = self.relu5(x)
 
-        return x
+        return dec_x
 
 
 def training(train_loader, model, criterion, optimizer, device, model_flag):
