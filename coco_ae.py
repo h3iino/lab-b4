@@ -172,8 +172,9 @@ class CNN_AutoEncoder(nn.Module):
         enc_x = self.Encoder(x)
 
         # x = x.reshape(-1, 512)
-        mid_x = enc_x.view(-1, 512)
-        # mid_x = enc_x.view(batch_size, -1)
+        # mid_x = enc_x.view(-1, 512)
+        batch_size = 4  # 仮（num_batchと要連携）
+        mid_x = enc_x.view(batch_size, -1)
         # x = self.flatten(x)
         # print(x.shape)
         # x = self.fc(x)
