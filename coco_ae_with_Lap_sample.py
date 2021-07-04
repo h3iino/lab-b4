@@ -237,14 +237,14 @@ def training(train_loader, model, criterion, optimizer, device):
         outputs, r64_outputs, r32_outputs, r16_outputs = model(images)
         
         loss = criterion(outputs, images)
-        # loss_lap256 = laploss(outputs, images, criterion, stages=8)
-        loss_lap256 = laploss(outputs, images, criterion, stages=3)
-        # loss_lap64 = laploss(r64_outputs, resize64_images, criterion, stages=6)
-        loss_lap64 = laploss(r64_outputs, resize64_images, criterion, stages=3)
-        # loss_lap32 = laploss(r32_outputs, resize32_images, criterion, stages=5)
-        loss_lap32 = laploss(r32_outputs, resize32_images, criterion, stages=3)
-        # loss_lap16 = laploss(r16_outputs, resize16_images, criterion, stages=4)
-        loss_lap16 = laploss(r16_outputs, resize16_images, criterion, stages=3)
+        loss_lap256 = laploss(outputs, images, criterion, stages=8)
+        # loss_lap256 = laploss(outputs, images, criterion, stages=3)
+        loss_lap64 = laploss(r64_outputs, resize64_images, criterion, stages=6)
+        # loss_lap64 = laploss(r64_outputs, resize64_images, criterion, stages=3)
+        loss_lap32 = laploss(r32_outputs, resize32_images, criterion, stages=5)
+        # loss_lap32 = laploss(r32_outputs, resize32_images, criterion, stages=3)
+        loss_lap16 = laploss(r16_outputs, resize16_images, criterion, stages=4)
+        # loss_lap16 = laploss(r16_outputs, resize16_images, criterion, stages=3)
         loss = loss + loss_lap256 + loss_lap64 + loss_lap32 + loss_lap16
         # loss = loss_lap256 + loss_lap64 + loss_lap32 + loss_lap16
 
