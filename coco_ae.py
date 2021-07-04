@@ -290,6 +290,9 @@ def show_image(img, image_flag):
     npimg = img.detach().numpy()
     figure_image = plt.figure()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
+
+    fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+
     figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0702.png")
     # figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_0615.png")
     plt.show()
