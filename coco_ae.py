@@ -5,8 +5,9 @@ import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
 from PIL import Image
-import cv2
 import sys, os 
+sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
+import cv2
 from pycocotools.coco import COCO
 
 torch.cuda.empty_cache()
