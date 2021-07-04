@@ -425,5 +425,14 @@ def main():
     show_image(input_image.reshape(-1, 3, 256, 256), image_flag="in")
     show_image(output_image.reshape(-1, 3, 256, 256), image_flag="out")
 
+    # debug
+    im_in = np.array(Image.open('movies/coco_AutoEncoder_in_sample_0702.png'))
+    im_out = np.array(Image.open('movies/coco_AutoEncoder_out_sample_0702.png'))
+    images = torch.Tensor(im_in)
+    outputs = torch.Tensor(im_out)
+    criterion = torch.nn.MSELoss()
+    loss = criterion(outputs, images)
+    print(loss)
+
 if __name__ == "__main__":
     main()
