@@ -293,7 +293,7 @@ def show_image(img, image_flag):
     figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_sample_0702.png")
     # figure_image.savefig(path + "coco_AutoEncoder_" + image_flag + "_0615.png")
     plt.show()
-    return figure_image
+    return npimg
 
 def main():
     num_epoch = 300
