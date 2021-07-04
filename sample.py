@@ -22,3 +22,5 @@ loss = criterion(outputs, images)
 
 # print(tmp2)
 print(loss)
+
+print(im_out)
