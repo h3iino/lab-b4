@@ -243,8 +243,8 @@ def testing(test_loader, model, criterion, optimizer, device, model_flag):
         images = images.to(device)
 
         outputs = model(images)
-        # loss = criterion(outputs, images)
-        loss = np.average(np.array(images)**2 - np.array(outputs)**2)
+        loss = criterion(outputs, images)
+        # loss = np.average(np.array(images)**2 - np.array(outputs)**2)
         val_loss += loss.item()
         # val_acc += (outputs.max(1)[1] == labels).sum().item()  #
         outputs_and_inputs.append((outputs, images))
