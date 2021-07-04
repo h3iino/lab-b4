@@ -179,10 +179,10 @@ class CNN_AutoEncoder(nn.Module):
         # print("m", mid_x)
         # x = self.fc(x)
         mid_x = self.rl1(self.bn1(self.fc1(mid_x)))
-        mid_x = self.rl2(self.bn2(self.fc2(mid_x)))
+        # mid_x = self.rl2(self.bn2(self.fc2(mid_x)))
         # mid_x = self.rl3(self.bn3(self.fc3(mid_x)))
         dec_x = mid_x.view(batch_size, 2, 16, 16)
-        print("d", dec_x)
+        # print("d", dec_x)
 
         dec_x = self.Decoder(dec_x)
 
