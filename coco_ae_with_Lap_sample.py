@@ -241,7 +241,8 @@ def training(train_loader, model, criterion, optimizer, device):
         loss_lap64 = laploss(r64_outputs, resize64_images, criterion, stages=6)
         loss_lap32 = laploss(r32_outputs, resize32_images, criterion, stages=5)
         loss_lap16 = laploss(r16_outputs, resize16_images, criterion, stages=4)
-        loss = loss + loss_lap256 + loss_lap64 + loss_lap32 + loss_lap16
+        # loss = loss + loss_lap256 + loss_lap64 + loss_lap32 + loss_lap16
+        loss = loss_lap256 + loss_lap64 + loss_lap32 + loss_lap16
 
         loss.backward()
         optimizer.step()
