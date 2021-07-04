@@ -93,7 +93,7 @@ class Coco_Dataset(torch.utils.data.Dataset):
 
 class CNN_AutoEncoder(nn.Module):
 
-    def __init__(self):
+    def __init__(self, batch_size):
         super(CNN_AutoEncoder, self).__init__()
         self.Encoder = nn.Sequential(  # in(3*256*256)
             # nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=5),  # out(8*64*64)
@@ -133,7 +133,7 @@ class CNN_AutoEncoder(nn.Module):
             nn.Tanh(),
         )
         self.fc = nn.Sequential(
-            nn.Linear(1024, 512),
+            nn.Linear(512, 512),
             # nn.Linear(16, 8),
             # nn.BatchNorm2d(8),
             nn.BatchNorm1d(512),
@@ -151,7 +151,7 @@ class CNN_AutoEncoder(nn.Module):
         )
 
         self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(1024, 512)
+        self.fc1 = nn.Linear(512, 512)
         self.bn1 = nn.BatchNorm1d(512)
         # self.fc1 = nn.Linear(8, 4)
         # self.bn1 = nn.BatchNorm2d(4)
@@ -167,35 +167,23 @@ class CNN_AutoEncoder(nn.Module):
         # self.bn3 = nn.BatchNorm2d(4)
         self.rl3 = nn.ReLU(inplace=True)
 
-        # self.conv1 = nn.Conv2d(3, 16, kernel_size=11, stride=4, padding=5)  # out(16*64*64)
-        # self.relu1 = nn.ReLU(inplace=True)
-        # self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)  # out(16*32*32)
-        # self.conv2 = nn.Conv2d(16, 8, kernel_size=5, stride=2, padding=2)  # out(8*16*16)
-        # self.relu2 = nn.ReLU(inplace=True)
-        # self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)  # out(8*8*8)
-
-        # self.t_conv1 = nn.ConvTranspose2d(8, 8, kernel_size=2, stride=2)  # out(8*16*16)
-        # self.relu3 = nn.ReLU(inplace=True)
-        # self.t_conv2 = nn.ConvTranspose2d(8, 16, kernel_size=4, stride=4)  # out(16*64*64)
-        # self.relu4 = nn.ReLU(inplace=True)
-        # self.t_conv3 = nn.ConvTranspose2d(16, 3, kernel_size=4, stride=4)  # out(3*256*256)
-        # self.relu5 = nn.ReLU(inplace=True)
 
     def forward(self, x):
-        x = self.Encoder(x)
+        enc_x = self.Encoder(x)
 
         # x = x.reshape(-1, 512)
-        x = x.view(-1, 1024)
+        mid_x = enc_x.view(-1, 512)
+        # mid_x = enc_x.view(batch_size, -1)
         # x = self.flatten(x)
         # print(x.shape)
         # x = self.fc(x)
-        x = self.rl1(self.bn1(self.fc1(x)))
-        x = self.rl2(self.bn2(self.fc2(x)))
-        x = self.rl3(self.bn3(self.fc3(x)))
-        x = x.view(-1, 4, 16, 16)
+        mid_x = self.rl1(self.bn1(self.fc1(mid_x)))
+        mid_x = self.rl2(self.bn2(self.fc2(mid_x)))
+        # mid_x = self.rl3(self.bn3(self.fc3(mid_x)))
+        dec_x = mid_x.view(-1, 2, 16, 16)
         # print(x.shape)
 
-        x = self.Decoder(x)
+        x = self.Decoder(dec_x)
 
         # x = self.conv1(x)
         # x = self.relu1(x)
